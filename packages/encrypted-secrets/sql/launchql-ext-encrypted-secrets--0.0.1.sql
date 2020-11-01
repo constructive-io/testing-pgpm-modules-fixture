@@ -207,7 +207,7 @@ BEGIN
   SELECT
     *
   FROM
-    secrets_schema.secrets_get_fn_name (secrets_verify.secrets_owned_field, secrets_verify.secret_name)
+    encrypted_secrets.secrets_getter (secrets_verify.secrets_owned_field, secrets_verify.secret_name)
   INTO v_secret_text;
 
   SELECT
