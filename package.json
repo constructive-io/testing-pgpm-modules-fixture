@@ -3,8 +3,7 @@
   "name": "internal-utils",
   "scripts": {
     "build": "lerna run prepare --parallel",
-    "bootstrap": "lerna bootstrap --use-workspaces",
-    "prepare": "launchql package"
+    "bootstrap": "lerna bootstrap --use-workspaces"
   },
   "devDependencies": {
     "@babel/cli": "7.12.1",
