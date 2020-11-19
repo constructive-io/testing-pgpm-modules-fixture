@@ -2,56 +2,59 @@
 
 -- requires: schemas/services_public/schema
 -- requires: schemas/services_public/tables/services/table
+-- requires: schemas/services_public/procedures/add_service 
+-- requires: schemas/services_public/procedures/add_plugin
 
 BEGIN;
 
 CREATE FUNCTION services_public.add_api_service(
-  subdomain hostname,
-  domain hostname,
-  dbname text,
-  role_name text,
-  anon_role text,
-  schemas text[],
-  name text DEFAULT null
+  v_subdomain hostname,
+  v_domain hostname,
+  v_dbname text,
+  v_role_name text,
+  v_anon_role text,
+  v_schemas text[],
+  v_name text DEFAULT null,
+  v_database_id uuid DEFAULT null
 ) returns services_public.services as $$
 DECLARE
   svc services_public.services;
   datum jsonb = '{}'::jsonb;
 BEGIN
 
-  IF (name IS NULL) THEN 
-    name = concat(subdomain, '.', domain);
-  END IF;
-
-  datum = jsonb_set(
-    datum,
-    ARRAY['graphile']::text[],
-    '{}'::jsonb
+  svc = services_public.add_service(
+    v_subdomain := v_subdomain,
+    v_domain := v_domain,
+    v_dbname := v_dbname,
+    v_type := 'api',
+    v_name := v_name,
+    v_database_id := v_database_id
   );
 
   datum = jsonb_set(
     datum,
-    ARRAY['graphile', 'role_name']::text[],
-    to_jsonb(role_name)
+    ARRAY['role_name']::text[],
+    to_jsonb(v_role_name)
   );
 
   datum = jsonb_set(
     datum,
-    ARRAY['graphile', 'anon_role']::text[],
-    to_jsonb(anon_role)
+    ARRAY['anon_role']::text[],
+    to_jsonb(v_anon_role)
   );
 
   datum = jsonb_set(
     datum,
-    ARRAY['graphile', 'schemas']::text[],
-    to_jsonb(schemas)
+    ARRAY['schemas']::text[],
+    to_jsonb(v_schemas)
   );
 
-  INSERT INTO services_public.services 
-    (subdomain, domain, name, type, dbname, data)
-  VALUES 
-    (subdomain, domain, name, 'api', dbname, datum)
-  RETURNING * INTO svc;
+  svc = services_public.add_plugin(
+    v_subdomain := v_subdomain,
+    v_domain := v_domain,
+    v_name := 'graphile',
+    v_data := datum
+  );
 
   RETURN svc;
 END;

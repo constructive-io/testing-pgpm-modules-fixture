@@ -2,30 +2,26 @@
 
 -- requires: schemas/services_public/schema
 -- requires: schemas/services_public/tables/services/table
+-- requires: schemas/services_public/procedures/add_service 
 
 BEGIN;
 
 CREATE FUNCTION services_public.add_renderer(
-  subdomain hostname,
-  domain hostname,
-  dbname text,
-  name text DEFAULT null
+  v_subdomain hostname,
+  v_domain hostname,
+  v_dbname text,
+  v_name text DEFAULT null,
+  v_database_id uuid DEFAULT null
 ) returns services_public.services as $$
-DECLARE
-  svc services_public.services;
 BEGIN
-
-  IF (name IS NULL) THEN 
-    name = concat(subdomain, '.', domain);
-  END IF;
-
-  INSERT INTO services_public.services 
-    (subdomain, domain, name, type, dbname)
-  VALUES 
-    (subdomain, domain, name, 'renderer', dbname)
-  RETURNING * INTO svc;
-
-  RETURN svc;
+  RETURN services_public.add_service(
+    v_subdomain := v_subdomain,
+    v_domain := v_domain,
+    v_dbname := v_dbname,
+    v_type := 'renderer',
+    v_name := v_name,
+    v_database_id := v_database_id
+  );
 END;
 $$
 LANGUAGE 'plpgsql' VOLATILE;
