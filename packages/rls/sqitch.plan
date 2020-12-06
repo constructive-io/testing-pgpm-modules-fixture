@@ -1,0 +1,5 @@
+%syntax-version=1.0.0
+%project=launchql-rls
+%uri=launchql-rls
+  
+procedures/rls 2020-12-06T02:13:38Z Dan Lynch <dlynch@Dans-MBP-3> # add procedures/rls
