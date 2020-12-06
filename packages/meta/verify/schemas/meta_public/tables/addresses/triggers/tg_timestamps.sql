@@ -1,6 +1,0 @@
--- Verify: schemas/meta_public/tables/addresses/triggers/tg_timestamps on pg
-
-BEGIN;
-
-COMMIT;  
-
