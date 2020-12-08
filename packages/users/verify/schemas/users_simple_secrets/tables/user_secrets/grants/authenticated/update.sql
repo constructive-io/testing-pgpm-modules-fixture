@@ -1,0 +1,6 @@
+-- Verify: schemas/users_simple_secrets/tables/user_secrets/grants/authenticated/update on pg
+
+BEGIN;
+SELECT verify_table_grant('users_simple_secrets.user_secrets', 'update', 'authenticated');
+COMMIT;  
+
