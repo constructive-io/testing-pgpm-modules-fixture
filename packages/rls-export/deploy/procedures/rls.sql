@@ -1192,6 +1192,17 @@ $EOFCODE$ LANGUAGE plpgsql VOLATILE SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION rls_roles_public.register TO anonymous;
 
+CREATE FUNCTION rls_roles_public.logout ( token text ) RETURNS void AS $EOFCODE$
+BEGIN
+  IF (token IS NOT NULL) THEN 
+      DELETE FROM "rls_roles_private".api_tokens t
+    WHERE t.access_token = logout.token;
+  END IF;
+END;
+$EOFCODE$ LANGUAGE plpgsql VOLATILE SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION rls_roles_public.logout TO authenticated;
+
 CREATE FUNCTION rls_roles_public.set_password ( current_password text, new_password text ) RETURNS boolean AS $EOFCODE$
 DECLARE
   v_user "rls_public".users;
@@ -2384,5 +2395,4 @@ GRANT INSERT ON TABLE collections_public.field TO authenticated;
 GRANT UPDATE ON TABLE collections_public.field TO authenticated;
 
 GRANT DELETE ON TABLE collections_public.field TO authenticated;
-
 COMMIT;
