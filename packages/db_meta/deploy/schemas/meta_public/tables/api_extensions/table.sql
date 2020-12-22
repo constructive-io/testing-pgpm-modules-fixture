@@ -2,8 +2,6 @@
 
 -- requires: schemas/meta_public/schema
 -- requires: schemas/meta_public/tables/apis/table 
--- requires: schemas/collections_public/tables/extension/table 
-
 
 -- requires: schemas/collections_public/tables/database_extension/table 
 -- requires: schemas/collections_public/tables/extension/table 
