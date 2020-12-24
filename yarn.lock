@@ -1533,10 +1533,10 @@
   dependencies:
     "@launchql/ext-default-roles" "^0.1.0"
 
-"@launchql/ext-types@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.npmjs.org/@launchql/ext-types/-/ext-types-0.0.6.tgz#f3292bb543cf0c995f9333565d733807f302214c"
-  integrity sha512-l/sShTwHzVworlxgSVEn9n5Flrr7teJcSz27c5/ZesIHIyue5+YGQMHuQk8LKhwtKzCwPyoNzz2E29Epn4LhQQ==
+"@launchql/ext-types@^0.1.14":
+  version "0.1.14"
+  resolved "https://registry.npmjs.org/@launchql/ext-types/-/ext-types-0.1.14.tgz#c1eea69c1abe0082d6da4444a1f265d824d54a69"
+  integrity sha512-CKjsfSHB6u84+EfcAGna3/mfloXFNRdeGiGXf8ivI1kEvQMyt/Qj1fm5jVd7wg7Tt0mIGgJ68xWpv4YCh9raOw==
 
 "@launchql/graphile-query@0.0.3":
   version "0.0.3"
