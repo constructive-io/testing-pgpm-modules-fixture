@@ -1,5 +1,15 @@
 # deployment
 
+NOTE:::: NOW YOU DO THIS INSIDE OF lql/pg
+
+1. run lql.test.js
+2. lql export!!!
+3. choose lql and svc as per usual.. all just works!
+
+
+OLD WAY:
+
+
 1. run the introspection test in pg
 
 2. `lql export` inside of a sandbox lql repo

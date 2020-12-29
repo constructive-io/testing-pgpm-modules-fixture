@@ -12,7 +12,7 @@ CREATE TABLE meta_public.emails_module (
     table_id uuid NOT NULL DEFAULT uuid_nil(),
 
     emails_table text,
-    multiple_emails boolean default FALSE,
+    multiple_emails boolean default TRUE,
 
     --
     CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES collections_public.database (id) ON DELETE CASCADE,
