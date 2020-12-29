@@ -8,6 +8,8 @@
 * uncheck the `collections_public` during cli
 * delete the `svc` extension when outputs
 
+CAVEAT: maybe we use `svc/meta.sql` for our svc... let's see.
+
 3. 
 
 ```

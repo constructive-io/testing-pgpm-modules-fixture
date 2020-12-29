@@ -1,0 +1,8 @@
+# svc extension
+comment = 'svc extension'
+default_version = '0.0.1'
+module_pathname = '$libdir/svc'
+requires = 'plpgsql,db_meta,db_meta_modules'
+relocatable = false
+superuser = false
+  
