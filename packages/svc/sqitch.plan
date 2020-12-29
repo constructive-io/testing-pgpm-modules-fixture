@@ -1,5 +1,0 @@
-%syntax-version=1.0.0
-%project=svc
-%uri=svc
-
-migrate/meta 2017-08-11T08:11:51Z launchql <launchql@5b0c196eeb62> # add undefined
