@@ -12,76 +12,10 @@ GRANT USAGE ON SCHEMA rls_private TO authenticated;
 GRANT USAGE ON SCHEMA rls_private TO anonymous;
 
 CREATE FUNCTION rls_private.uuid_generate_v4 (  ) RETURNS uuid AS $EOFCODE$
-DECLARE
-    new_uuid char(36);
-    md5_str char(32);
-    md5_str2 char(32);
-    uid text;
-BEGIN
-    md5_str := md5(concat(random(), now()));
-    md5_str2 := md5(concat(random(), now()));
-    
-    new_uuid := concat(
-        LEFT (md5('launchql'), 2),
-        LEFT (md5(concat(extract(year FROM now()), extract(week FROM now()))), 2),
-        substring(md5_str, 1, 4),
-        '-',
-        substring(md5_str, 5, 4),
-        '-4',
-        substring(md5_str2, 9, 3),
-        '-',
-        substring(md5_str, 13, 4),
-        '-', 
-        substring(md5_str2, 17, 12)
-    );
-    RETURN new_uuid;
-END;
-$EOFCODE$ LANGUAGE plpgsql;
-
-CREATE FUNCTION rls_private.uuid_generate_seeded_uuid ( seed text ) RETURNS uuid AS $EOFCODE$
-DECLARE
-    new_uuid char(36);
-    md5_str char(32);
-    md5_str2 char(32);
-    uid text;
-BEGIN
-    md5_str := md5(concat(random(), now()));
-    md5_str2 := md5(concat(random(), now()));
-    
-    new_uuid := concat(
-        LEFT (md5(seed), 2),
-        LEFT (md5(concat(extract(year FROM now()), extract(week FROM now()))), 2),
-        substring(md5_str, 1, 4),
-        '-',
-        substring(md5_str, 5, 4),
-        '-4',
-        substring(md5_str2, 9, 3),
-        '-',
-        substring(md5_str, 13, 4),
-        '-', 
-        substring(md5_str2, 17, 12)
-    );
-    RETURN new_uuid;
-END;
-$EOFCODE$ LANGUAGE plpgsql VOLATILE;
-
-CREATE FUNCTION rls_private.seeded_uuid_related_trigger (  ) RETURNS trigger AS $EOFCODE$
-DECLARE
-    _seed_column text := to_json(NEW) ->> TG_ARGV[1];
-BEGIN
-    IF _seed_column IS NULL THEN
-        RAISE EXCEPTION 'UUID seed is NULL on table %', TG_TABLE_NAME;
-    END IF;
-    NEW := NEW #= (TG_ARGV[0] || '=>' || "rls_private".uuid_generate_seeded_uuid(_seed_column))::hstore;
-    RETURN NEW;
-END;
-$EOFCODE$ LANGUAGE plpgsql VOLATILE;
+    SELECT uuids.pseudo_order_seed_uuid('launchql');
+$EOFCODE$ LANGUAGE sql;
 
 GRANT EXECUTE ON FUNCTION rls_private.uuid_generate_v4 TO PUBLIC;
-
-GRANT EXECUTE ON FUNCTION rls_private.uuid_generate_seeded_uuid TO PUBLIC;
-
-GRANT EXECUTE ON FUNCTION rls_private.seeded_uuid_related_trigger TO PUBLIC;
 
 CREATE TABLE rls_public.users (
   
@@ -220,41 +154,41 @@ ALTER TABLE rls_roles_private.api_tokens ADD CONSTRAINT api_tokens_access_token_
 
 CREATE INDEX api_tokens_user_id_idx ON rls_roles_private.api_tokens ( user_id );
 
-CREATE SCHEMA rls_encrypted_secrets;
+CREATE SCHEMA rls_encrypted;
 
-GRANT USAGE ON SCHEMA rls_encrypted_secrets TO authenticated;
+GRANT USAGE ON SCHEMA rls_encrypted TO authenticated;
 
-GRANT USAGE ON SCHEMA rls_encrypted_secrets TO anonymous;
+GRANT USAGE ON SCHEMA rls_encrypted TO anonymous;
 
-CREATE TABLE rls_encrypted_secrets.user_encrypted_secrets (
+CREATE TABLE rls_encrypted.user_encrypted_secrets (
   
 );
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets DISABLE ROW LEVEL SECURITY;
+ALTER TABLE rls_encrypted.user_encrypted_secrets DISABLE ROW LEVEL SECURITY;
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ADD COLUMN  id uuid;
+ALTER TABLE rls_encrypted.user_encrypted_secrets ADD COLUMN  id uuid;
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ALTER COLUMN id SET NOT NULL;
+ALTER TABLE rls_encrypted.user_encrypted_secrets ALTER COLUMN id SET NOT NULL;
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ALTER COLUMN id SET DEFAULT rls_private.uuid_generate_v4();
+ALTER TABLE rls_encrypted.user_encrypted_secrets ALTER COLUMN id SET DEFAULT rls_private.uuid_generate_v4();
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ADD COLUMN  owner_id uuid;
+ALTER TABLE rls_encrypted.user_encrypted_secrets ADD COLUMN  owner_id uuid;
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ALTER COLUMN owner_id SET NOT NULL;
+ALTER TABLE rls_encrypted.user_encrypted_secrets ALTER COLUMN owner_id SET NOT NULL;
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ADD COLUMN  name text;
+ALTER TABLE rls_encrypted.user_encrypted_secrets ADD COLUMN  name text;
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ALTER COLUMN name SET NOT NULL;
+ALTER TABLE rls_encrypted.user_encrypted_secrets ALTER COLUMN name SET NOT NULL;
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ADD COLUMN  value bytea;
+ALTER TABLE rls_encrypted.user_encrypted_secrets ADD COLUMN  value bytea;
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ADD COLUMN  algo text;
+ALTER TABLE rls_encrypted.user_encrypted_secrets ADD COLUMN  algo text;
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ADD CONSTRAINT user_encrypted_secrets_pkey PRIMARY KEY ( id );
+ALTER TABLE rls_encrypted.user_encrypted_secrets ADD CONSTRAINT user_encrypted_secrets_pkey PRIMARY KEY ( id );
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ADD CONSTRAINT user_encrypted_secrets_owner_id_name_key UNIQUE ( owner_id, name );
+ALTER TABLE rls_encrypted.user_encrypted_secrets ADD CONSTRAINT user_encrypted_secrets_owner_id_name_key UNIQUE ( owner_id, name );
 
-CREATE FUNCTION rls_encrypted_secrets.user_encrypted_secrets_hash (  ) RETURNS trigger AS $EOFCODE$
+CREATE FUNCTION rls_encrypted.user_encrypted_secrets_hash (  ) RETURNS trigger AS $EOFCODE$
 BEGIN
    
 IF (NEW.algo = 'crypt') THEN
@@ -269,24 +203,24 @@ END;
 $EOFCODE$ LANGUAGE plpgsql VOLATILE;
 
 CREATE TRIGGER user_encrypted_secrets_update_tg 
- BEFORE UPDATE ON rls_encrypted_secrets.user_encrypted_secrets 
+ BEFORE UPDATE ON rls_encrypted.user_encrypted_secrets 
  FOR EACH ROW
  WHEN ( NEW.value IS DISTINCT FROM OLD.value ) 
- EXECUTE PROCEDURE rls_encrypted_secrets. user_encrypted_secrets_hash (  );
+ EXECUTE PROCEDURE rls_encrypted. user_encrypted_secrets_hash (  );
 
 CREATE TRIGGER user_encrypted_secrets_insert_tg 
- BEFORE INSERT ON rls_encrypted_secrets.user_encrypted_secrets 
+ BEFORE INSERT ON rls_encrypted.user_encrypted_secrets 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_encrypted_secrets. user_encrypted_secrets_hash (  );
+ EXECUTE PROCEDURE rls_encrypted. user_encrypted_secrets_hash (  );
 
-CREATE FUNCTION rls_encrypted_secrets.get ( owner_id uuid, secret_name text, default_value text DEFAULT NULL ) RETURNS text AS $EOFCODE$
+CREATE FUNCTION rls_encrypted.get ( owner_id uuid, secret_name text, default_value text DEFAULT NULL ) RETURNS text AS $EOFCODE$
 DECLARE
-  v_secret "rls_encrypted_secrets".user_encrypted_secrets;
+  v_secret "rls_encrypted".user_encrypted_secrets;
 BEGIN
   SELECT
     *
   FROM
-    "rls_encrypted_secrets".user_encrypted_secrets s
+    "rls_encrypted".user_encrypted_secrets s
   WHERE
     s.name = get.secret_name
     AND s.owner_id = get.owner_id
@@ -304,22 +238,22 @@ BEGIN
 END
 $EOFCODE$ LANGUAGE plpgsql STABLE;
 
-GRANT EXECUTE ON FUNCTION rls_encrypted_secrets.get TO authenticated;
+GRANT EXECUTE ON FUNCTION rls_encrypted.get TO authenticated;
 
-CREATE FUNCTION rls_encrypted_secrets.verify ( owner_id uuid, secret_name text, value text ) RETURNS boolean AS $EOFCODE$
+CREATE FUNCTION rls_encrypted.verify ( owner_id uuid, secret_name text, value text ) RETURNS boolean AS $EOFCODE$
 DECLARE
   v_secret_text text;
-  v_secret "rls_encrypted_secrets".user_encrypted_secrets;
+  v_secret "rls_encrypted".user_encrypted_secrets;
 BEGIN
   SELECT
     *
   FROM
-    "rls_encrypted_secrets".get (verify.owner_id, verify.secret_name)
+    "rls_encrypted".get (verify.owner_id, verify.secret_name)
   INTO v_secret_text;
   SELECT
     *
   FROM
-    "rls_encrypted_secrets".user_encrypted_secrets s
+    "rls_encrypted".user_encrypted_secrets s
   WHERE
     s.name = verify.secret_name
     AND s.owner_id = verify.owner_id INTO v_secret;
@@ -332,11 +266,11 @@ BEGIN
 END
 $EOFCODE$ LANGUAGE plpgsql STABLE;
 
-GRANT EXECUTE ON FUNCTION rls_encrypted_secrets.verify TO authenticated;
+GRANT EXECUTE ON FUNCTION rls_encrypted.verify TO authenticated;
 
-CREATE FUNCTION rls_encrypted_secrets.set ( v_owner_id uuid, secret_name text, secret_value text, v_algo text DEFAULT 'pgp' ) RETURNS boolean AS $EOFCODE$
+CREATE FUNCTION rls_encrypted.set ( v_owner_id uuid, secret_name text, secret_value text, v_algo text DEFAULT 'pgp' ) RETURNS boolean AS $EOFCODE$
 BEGIN
-  INSERT INTO "rls_encrypted_secrets".user_encrypted_secrets (owner_id, name, value, algo)
+  INSERT INTO "rls_encrypted".user_encrypted_secrets (owner_id, name, value, algo)
     VALUES (v_owner_id, set.secret_name, set.secret_value::bytea, set.v_algo)
     ON CONFLICT (owner_id, name)
     DO
@@ -348,36 +282,27 @@ BEGIN
 END
 $EOFCODE$ LANGUAGE plpgsql VOLATILE;
 
-GRANT EXECUTE ON FUNCTION rls_encrypted_secrets.set TO authenticated;
+GRANT EXECUTE ON FUNCTION rls_encrypted.set TO authenticated;
 
-CREATE FUNCTION rls_encrypted_secrets.del ( owner_id uuid, secret_name text ) RETURNS void AS $EOFCODE$
+CREATE FUNCTION rls_encrypted.del ( owner_id uuid, secret_name text ) RETURNS void AS $EOFCODE$
 BEGIN
-  DELETE FROM "rls_encrypted_secrets".user_encrypted_secrets s
+  DELETE FROM "rls_encrypted".user_encrypted_secrets s
   WHERE s.owner_id = del.owner_id
     AND s.name = del.secret_name;
 END
 $EOFCODE$ LANGUAGE plpgsql VOLATILE;
 
-CREATE FUNCTION rls_encrypted_secrets.del ( owner_id uuid, secret_names text[] ) RETURNS void AS $EOFCODE$
+CREATE FUNCTION rls_encrypted.del ( owner_id uuid, secret_names text[] ) RETURNS void AS $EOFCODE$
 BEGIN
-  DELETE FROM "rls_encrypted_secrets".user_encrypted_secrets s
+  DELETE FROM "rls_encrypted".user_encrypted_secrets s
   WHERE s.owner_id = del.owner_id
     AND s.name = ANY(del.secret_names);
 END
 $EOFCODE$ LANGUAGE plpgsql VOLATILE;
 
-GRANT EXECUTE ON FUNCTION rls_encrypted_secrets.del ( uuid,text ) TO authenticated;
+GRANT EXECUTE ON FUNCTION rls_encrypted.del ( uuid,text ) TO authenticated;
 
-GRANT EXECUTE ON FUNCTION rls_encrypted_secrets.del ( uuid,text[] ) TO authenticated;
-
-CREATE FUNCTION rls_private.immutable_field_tg (  ) RETURNS trigger AS $EOFCODE$
-BEGIN
-  IF TG_NARGS > 0 THEN
-    RAISE EXCEPTION 'IMMUTABLE_PROPERTY %', TG_ARGV[0];
-  END IF;
-  RAISE EXCEPTION 'IMMUTABLE_PROPERTY';
-END;
-$EOFCODE$ LANGUAGE plpgsql VOLATILE;
+GRANT EXECUTE ON FUNCTION rls_encrypted.del ( uuid,text[] ) TO authenticated;
 
 CREATE SCHEMA rls_roles_public;
 
@@ -394,6 +319,50 @@ WHERE
     tkn.access_token = authenticate.token_str
     AND EXTRACT(EPOCH FROM (tkn.access_token_expires_at-NOW())) > 0;
 $EOFCODE$ LANGUAGE sql STABLE SECURITY DEFINER;
+
+CREATE FUNCTION rls_roles_public.current_user_agent (  ) RETURNS text AS $EOFCODE$
+DECLARE
+  v_uagent text;
+BEGIN
+  IF current_setting('jwt.claims.user_agent', TRUE)
+    IS NOT NULL THEN
+    BEGIN
+      v_uagent = current_setting('jwt.claims.user_agent', TRUE);
+    EXCEPTION
+      WHEN OTHERS THEN
+      RAISE NOTICE 'Invalid UserAgent';
+    RETURN NULL;
+    END;
+    RETURN v_uagent;
+  ELSE
+    RETURN NULL;
+  END IF;
+END;
+$EOFCODE$ LANGUAGE plpgsql STABLE;
+
+GRANT EXECUTE ON FUNCTION rls_roles_public.current_user_agent TO authenticated;
+
+CREATE FUNCTION rls_roles_public.current_ip_address (  ) RETURNS inet AS $EOFCODE$
+DECLARE
+  v_ip_addr inet;
+BEGIN
+  IF current_setting('jwt.claims.ip_address', TRUE)
+    IS NOT NULL THEN
+    BEGIN
+      v_ip_addr = current_setting('jwt.claims.ip_address', TRUE)::inet;
+    EXCEPTION
+      WHEN OTHERS THEN
+      RAISE NOTICE 'Invalid IP';
+    RETURN NULL;
+    END;
+    RETURN v_ip_addr;
+  ELSE
+    RETURN NULL;
+  END IF;
+END;
+$EOFCODE$ LANGUAGE plpgsql STABLE;
+
+GRANT EXECUTE ON FUNCTION rls_roles_public.current_ip_address TO authenticated;
 
 CREATE FUNCTION rls_roles_public.get_current_user_id (  ) RETURNS uuid AS $EOFCODE$
 DECLARE
@@ -454,32 +423,6 @@ $EOFCODE$ LANGUAGE plpgsql STABLE;
 
 GRANT EXECUTE ON FUNCTION rls_roles_public.get_current_user TO authenticated;
 
-CREATE FUNCTION rls_private.tg_peoplestamps (  ) RETURNS trigger AS $EOFCODE$
-BEGIN
-    IF TG_OP = 'INSERT' THEN
-      NEW.updated_by = "rls_roles_public".get_current_user_id();
-      NEW.created_by = "rls_roles_public".get_current_user_id();
-    ELSIF TG_OP = 'UPDATE' THEN
-      NEW.updated_by = OLD.updated_by;
-      NEW.created_by = "rls_roles_public".get_current_user_id();
-    END IF;
-    RETURN NEW;
-END;
-$EOFCODE$ LANGUAGE plpgsql;
-
-CREATE FUNCTION rls_private.tg_timestamps (  ) RETURNS trigger AS $EOFCODE$
-BEGIN
-    IF TG_OP = 'INSERT' THEN
-      NEW.created_at = NOW();
-      NEW.updated_at = NOW();
-    ELSIF TG_OP = 'UPDATE' THEN
-      NEW.created_at = OLD.created_at;
-      NEW.updated_at = NOW();
-    END IF;
-    RETURN NEW;
-END;
-$EOFCODE$ LANGUAGE plpgsql;
-
 CREATE SCHEMA IF NOT EXISTS rls_private;
 
 GRANT USAGE ON SCHEMA rls_private TO authenticated, anonymous;
@@ -494,148 +437,45 @@ GRANT USAGE ON SCHEMA rls_public TO authenticated, anonymous;
 ALTER DEFAULT PRIVILEGES IN SCHEMA rls_public 
  GRANT EXECUTE ON FUNCTIONS  TO authenticated;
 
-CREATE TABLE rls_public.user_achievement (
+CREATE TABLE rls_public.user_steps (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
-	name citext NOT NULL,
-	UNIQUE ( name ) 
+	user_id uuid NOT NULL,
+	name text NOT NULL,
+	count int NOT NULL DEFAULT ( 1 ),
+	created_at timestamptz NOT NULL DEFAULT ( CURRENT_TIMESTAMP ) 
 );
 
-CREATE TABLE rls_public.user_step (
- 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
-	name citext NOT NULL,
-	achievement_id uuid NOT NULL REFERENCES rls_public.user_achievement ( id ) ON DELETE CASCADE,
-	priority int DEFAULT ( 10000 ),
-	UNIQUE ( name ) 
-);
+COMMENT ON TABLE rls_public.user_steps IS E'The user achieving a requirement for a level. Log table that has every single step ever taken.';
 
-CREATE TABLE rls_public.user_step_achievement (
- 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
-	task_id uuid NOT NULL REFERENCES rls_public.user_step ( id ) ON DELETE CASCADE,
-	user_id uuid NOT NULL REFERENCES rls_public.users ( id ) ON DELETE CASCADE 
-);
+CREATE INDEX ON rls_public.user_steps ( user_id, name );
 
-CREATE FUNCTION rls_private.user_completed_task ( task citext, role_id uuid DEFAULT rls_roles_public.get_current_user_id() ) RETURNS void AS $EOFCODE$
-  INSERT INTO "rls_public".user_step_achievement (user_id, task_id)
-  VALUES (role_id, (
-      SELECT
-        t.id
-      FROM
-        "rls_public".user_step t
-      WHERE
-        name = task));
+CREATE FUNCTION rls_private.user_completed_step ( step text, user_id uuid DEFAULT jwt_public.current_user_id() ) RETURNS void AS $EOFCODE$
+  INSERT INTO "rls_public".user_steps ( name, user_id, count )
+  VALUES ( step, user_id, 1 );
 $EOFCODE$ LANGUAGE sql VOLATILE SECURITY DEFINER;
 
-CREATE FUNCTION rls_private.user_incompleted_task ( task citext, role_id uuid DEFAULT rls_roles_public.get_current_user_id() ) RETURNS void AS $EOFCODE$
-  DELETE FROM "rls_public".user_step_achievement
-  WHERE user_id = role_id
-    AND task_id = (
-      SELECT
-        t.id
-      FROM
-        "rls_public".user_step t
-      WHERE
-        name = task);
-$EOFCODE$ LANGUAGE sql VOLATILE SECURITY DEFINER;
-
-CREATE FUNCTION rls_public.tasks_required_for ( achievement citext, role_id uuid DEFAULT rls_roles_public.get_current_user_id() ) RETURNS SETOF rls_public.user_step AS $EOFCODE$
+CREATE FUNCTION rls_private.user_incompleted_step ( step text, user_id uuid DEFAULT jwt_public.current_user_id() ) RETURNS void AS $EOFCODE$
 BEGIN
-  RETURN QUERY
-    SELECT
-      t.*
-    FROM
-      "rls_public".user_step t
-    FULL OUTER JOIN "rls_public".user_step_achievement u ON (
-      u.task_id = t.id
-      AND u.user_id = role_id
-    )
-    JOIN "rls_public".user_achievement f ON (t.achievement_id = f.id)
-  WHERE
-    u.user_id IS NULL
-    AND f.name = achievement
-  ORDER BY t.priority ASC
-;
+  DELETE FROM "rls_public".user_steps s
+    WHERE s.user_id = user_incompleted_step.user_id
+    AND s.name = step;
+  DELETE FROM "rls_public".user_achievements a
+    WHERE a.user_id = user_incompleted_step.user_id
+    AND a.name = step;
 END;
-$EOFCODE$ LANGUAGE plpgsql STABLE;
-
-CREATE FUNCTION rls_public.user_achieved ( achievement citext, role_id uuid DEFAULT rls_roles_public.get_current_user_id() ) RETURNS boolean AS $EOFCODE$
-DECLARE
-  v_achievement "rls_public".user_achievement;
-  v_task "rls_public".user_step;
-  v_value boolean = TRUE;
-BEGIN
-  SELECT * FROM "rls_public".user_achievement
-    WHERE name = achievement
-    INTO v_achievement;
-  IF (NOT FOUND) THEN
-    RETURN FALSE;
-  END IF;
-  FOR v_task IN
-  SELECT * FROM
-    "rls_public".user_step
-    WHERE achievement_id = v_achievement.id
-  LOOP
-    SELECT EXISTS(
-      SELECT 1
-      FROM "rls_public".user_step_achievement
-      WHERE 
-        user_id = role_id
-        AND task_id = v_task.id
-    ) AND v_value
-      INTO v_value;
-    
-  END LOOP;
-  RETURN v_value;
-END;
-$EOFCODE$ LANGUAGE plpgsql STABLE;
-
-GRANT SELECT ON TABLE rls_public.user_achievement TO authenticated;
-
-CREATE INDEX user_id_idx ON rls_public.user_step_achievement ( user_id );
-
-ALTER TABLE rls_public.user_step_achievement ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY can_select_user_step_achievement ON rls_public.user_step_achievement FOR SELECT TO PUBLIC USING ( rls_roles_public.get_current_user_id() = user_id );
-
-CREATE POLICY can_insert_user_step_achievement ON rls_public.user_step_achievement FOR INSERT TO PUBLIC WITH CHECK ( FALSE );
-
-CREATE POLICY can_update_user_step_achievement ON rls_public.user_step_achievement FOR UPDATE TO PUBLIC USING ( FALSE );
-
-CREATE POLICY can_delete_user_step_achievement ON rls_public.user_step_achievement FOR DELETE TO PUBLIC USING ( FALSE );
-
-GRANT INSERT ON TABLE rls_public.user_step_achievement TO authenticated;
-
-GRANT SELECT ON TABLE rls_public.user_step_achievement TO authenticated;
-
-GRANT UPDATE ON TABLE rls_public.user_step_achievement TO authenticated;
-
-GRANT DELETE ON TABLE rls_public.user_step_achievement TO authenticated;
-
-ALTER TABLE rls_public.user_step_achievement ADD COLUMN  created_at timestamptz;
-
-ALTER TABLE rls_public.user_step_achievement ALTER COLUMN created_at SET DEFAULT now();
-
-ALTER TABLE rls_public.user_step_achievement ADD COLUMN  updated_at timestamptz;
-
-ALTER TABLE rls_public.user_step_achievement ALTER COLUMN updated_at SET DEFAULT now();
-
-CREATE TRIGGER update_user_step_achievement_modtime 
- BEFORE INSERT OR UPDATE ON rls_public.user_step_achievement 
- FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_timestamps (  );
-
-GRANT SELECT ON TABLE rls_public.user_step TO authenticated;
+$EOFCODE$ LANGUAGE plpgsql VOLATILE SECURITY DEFINER;
 
 CREATE FUNCTION rls_private.tg_achievement (  ) RETURNS trigger AS $EOFCODE$
 DECLARE
   is_null boolean;
-  task_name citext;
+  task_name text;
 BEGIN
     IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-        task_name = TG_ARGV[1]::citext;
+        task_name = TG_ARGV[1]::text;
         EXECUTE format('SELECT ($1).%s IS NULL', TG_ARGV[0])
         USING NEW INTO is_null;
         IF (is_null IS FALSE) THEN
-            PERFORM "rls_private".user_completed_task(task_name);
+            PERFORM "rls_private".user_completed_step(task_name);
         END IF;
         RETURN NEW;
     END IF;
@@ -645,16 +485,16 @@ $EOFCODE$ LANGUAGE plpgsql VOLATILE;
 CREATE FUNCTION rls_private.tg_achievement_toggle (  ) RETURNS trigger AS $EOFCODE$
 DECLARE
   is_null boolean;
-  task_name citext;
+  task_name text;
 BEGIN
     IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-        task_name = TG_ARGV[1]::citext;
+        task_name = TG_ARGV[1]::text;
         EXECUTE format('SELECT ($1).%s IS NULL', TG_ARGV[0])
         USING NEW INTO is_null;
         IF (is_null IS TRUE) THEN
-            PERFORM "rls_private".user_incompleted_task(task_name);
+            PERFORM "rls_private".user_incompleted_step(task_name);
         ELSE
-            PERFORM "rls_private".user_completed_task(task_name);
+            PERFORM "rls_private".user_completed_step(task_name);
         END IF;
         RETURN NEW;
     END IF;
@@ -664,14 +504,14 @@ $EOFCODE$ LANGUAGE plpgsql VOLATILE;
 CREATE FUNCTION rls_private.tg_achievement_boolean (  ) RETURNS trigger AS $EOFCODE$
 DECLARE
   is_true boolean;
-  task_name citext;
+  task_name text;
 BEGIN
     IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-        task_name = TG_ARGV[1]::citext;
+        task_name = TG_ARGV[1]::text;
         EXECUTE format('SELECT ($1).%s IS TRUE', TG_ARGV[0])
         USING NEW INTO is_true;
         IF (is_true IS TRUE) THEN
-            PERFORM "rls_private".user_completed_task(task_name);
+            PERFORM "rls_private".user_completed_step(task_name);
         END IF;
         RETURN NEW;
     END IF;
@@ -681,56 +521,146 @@ $EOFCODE$ LANGUAGE plpgsql VOLATILE;
 CREATE FUNCTION rls_private.tg_achievement_toggle_boolean (  ) RETURNS trigger AS $EOFCODE$
 DECLARE
   is_true boolean;
-  task_name citext;
+  task_name text;
 BEGIN
     IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-        task_name = TG_ARGV[1]::citext;
+        task_name = TG_ARGV[1]::text;
         EXECUTE format('SELECT ($1).%s IS TRUE', TG_ARGV[0])
         USING NEW INTO is_true;
         IF (is_true IS TRUE) THEN
-            PERFORM "rls_private".user_completed_task(task_name);
+            PERFORM "rls_private".user_completed_step(task_name);
         ELSE
-            PERFORM "rls_private".user_incompleted_task(task_name);
+            PERFORM "rls_private".user_incompleted_step(task_name);
         END IF;
         RETURN NEW;
     END IF;
 END;
 $EOFCODE$ LANGUAGE plpgsql VOLATILE;
 
-DO $$
-  DECLARE
-  beginner uuid;
-  verifier uuid;
-  BEGIN
-    INSERT INTO "rls_public".user_achievement (name)
-      VALUES ('profile_complete')
-    RETURNING id INTO beginner;
-    INSERT INTO "rls_public".user_achievement (name)
-      VALUES ('verifier')
-    RETURNING id INTO verifier;
-    INSERT INTO "rls_public".user_step (achievement_id, name)
-      VALUES 
-      (beginner, 'accept_privacy'),
-      (beginner, 'agree_to_terms'),
-      (beginner, 'set_password'),
-      (beginner, 'upload_profile_picture'),
-      (beginner, 'email_verified');
-    INSERT INTO "rls_public".user_step (achievement_id, name)
-      VALUES 
-      (verifier, 'complete_action'),
-      (verifier, 'send_invite'), -- would be cool to specify numbers too, if it's more than one!
-      (verifier, 'submit_application'),
-      (verifier, 'create_action')
+CREATE TABLE rls_public.user_achievements (
+ 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
+	user_id uuid NOT NULL,
+	name text NOT NULL,
+	count int NOT NULL DEFAULT ( 0 ),
+	created_at timestamptz NOT NULL DEFAULT ( CURRENT_TIMESTAMP ),
+	CONSTRAINT user_achievements_unique_key UNIQUE ( user_id, name ) 
+);
+
+COMMENT ON TABLE rls_public.user_achievements IS E'This table represents the users progress for particular level requirements, tallying the total count. This table is updated via triggers and should not be updated maually.';
+
+CREATE INDEX ON rls_public.user_achievements ( user_id, name );
+
+CREATE FUNCTION rls_private.upsert_achievement ( vuser_id uuid, vname text, vcount int ) RETURNS void AS $EOFCODE$
+BEGIN
+    INSERT INTO "rls_public".user_achievements (user_id, name, count)
+    VALUES 
+        (vuser_id, vname, GREATEST(vcount, 0))
+    ON CONFLICT ON CONSTRAINT user_achievements_unique_key
+    DO UPDATE SET 
+        count = user_achievements.count + EXCLUDED.count
     ;
-  END; $$;
+END;
+$EOFCODE$ LANGUAGE plpgsql VOLATILE;
+
+CREATE TABLE rls_public.levels (
+ 	name text NOT NULL PRIMARY KEY 
+);
+
+COMMENT ON TABLE rls_public.levels IS E'Levels for achievement';
+
+GRANT SELECT ON TABLE rls_public.levels TO authenticated;
+
+CREATE TABLE rls_public.level_requirements (
+ 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
+	name text NOT NULL,
+	level text NOT NULL,
+	required_count int DEFAULT ( 1 ),
+	priority int DEFAULT ( 100 ),
+	UNIQUE ( name, level ) 
+);
+
+COMMENT ON TABLE rls_public.level_requirements IS E'Requirements to achieve a level';
+
+CREATE INDEX ON rls_public.level_requirements ( name, level, priority );
+
+GRANT SELECT ON TABLE rls_public.levels TO authenticated;
+
+CREATE FUNCTION rls_public.steps_required ( vlevel text, vrole_id uuid DEFAULT jwt_public.current_user_id() ) RETURNS SETOF rls_public.level_requirements AS $EOFCODE$
+BEGIN
+  RETURN QUERY
+  SELECT 
+      level_requirements.id,
+      level_requirements.name,
+      level_requirements.level,
+      -1*(coalesce(user_achievements.count,0)-level_requirements.required_count) as required_count,
+      level_requirements.priority
+    FROM
+      "rls_public".level_requirements 
+    FULL OUTER JOIN "rls_public".user_achievements ON (
+      user_achievements.name = level_requirements.name
+      AND user_achievements.user_id =vrole_id
+    )	
+    JOIN "rls_public".levels ON (level_requirements.level = levels.name)
+  WHERE
+    level_requirements.level = vlevel
+    AND -1*(coalesce(user_achievements.count,0)-level_requirements.required_count) > 0
+  ORDER BY priority ASC
+;
+END;
+$EOFCODE$ LANGUAGE plpgsql STABLE;
+
+CREATE FUNCTION rls_public.user_achieved ( vlevel text, vrole_id uuid DEFAULT jwt_public.current_user_id() ) RETURNS boolean AS $EOFCODE$
+DECLARE
+  c int;
+BEGIN
+  SELECT COUNT(*) FROM
+    "rls_public".steps_required(
+      vlevel,
+      vrole_id
+    )
+  INTO c;
+  RETURN c <= 0;
+END;
+$EOFCODE$ LANGUAGE plpgsql STABLE;
+
+ALTER TABLE rls_public.user_achievements ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY can_select_user_achievements ON rls_public.user_achievements FOR SELECT TO PUBLIC USING ( jwt_public.current_user_id() = user_id );
+
+CREATE POLICY can_insert_user_achievements ON rls_public.user_achievements FOR INSERT TO PUBLIC WITH CHECK ( FALSE );
+
+CREATE POLICY can_update_user_achievements ON rls_public.user_achievements FOR UPDATE TO PUBLIC USING ( FALSE );
+
+CREATE POLICY can_delete_user_achievements ON rls_public.user_achievements FOR DELETE TO PUBLIC USING ( FALSE );
+
+GRANT INSERT ON TABLE rls_public.user_achievements TO authenticated;
+
+GRANT SELECT ON TABLE rls_public.user_achievements TO authenticated;
+
+GRANT UPDATE ON TABLE rls_public.user_achievements TO authenticated;
+
+GRANT DELETE ON TABLE rls_public.user_achievements TO authenticated;
+
+CREATE FUNCTION rls_private.tg_update_achievements_tg (  ) RETURNS trigger AS $EOFCODE$
+DECLARE
+BEGIN
+    PERFORM "rls_private".upsert_achievement(NEW.user_id, NEW.name, NEW.count);
+    RETURN NEW;
+END;
+$EOFCODE$ LANGUAGE plpgsql VOLATILE SECURITY DEFINER;
+
+CREATE TRIGGER update_achievements_tg 
+ AFTER INSERT ON rls_public.user_steps 
+ FOR EACH ROW
+ EXECUTE PROCEDURE rls_private. tg_update_achievements_tg (  );
 
 ALTER TABLE rls_public.users ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_insert_on_users ON rls_public.users FOR INSERT TO authenticated WITH CHECK ( id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_users ON rls_public.users FOR INSERT TO authenticated WITH CHECK ( id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_users ON rls_public.users FOR UPDATE TO authenticated USING ( id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_users ON rls_public.users FOR UPDATE TO authenticated USING ( id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_users ON rls_public.users FOR DELETE TO authenticated USING ( id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_users ON rls_public.users FOR DELETE TO authenticated USING ( id = jwt_public.current_user_id() );
 
 GRANT INSERT ON TABLE rls_public.users TO authenticated;
 
@@ -742,33 +672,33 @@ CREATE POLICY authenticated_can_select_on_users ON rls_public.users FOR SELECT T
 
 GRANT SELECT ON TABLE rls_public.users TO authenticated;
 
-ALTER TABLE rls_encrypted_secrets.user_encrypted_secrets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rls_encrypted.user_encrypted_secrets ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_user_encrypted_secrets ON rls_encrypted_secrets.user_encrypted_secrets FOR SELECT TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_user_encrypted_secrets ON rls_encrypted.user_encrypted_secrets FOR SELECT TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_insert_on_user_encrypted_secrets ON rls_encrypted_secrets.user_encrypted_secrets FOR INSERT TO authenticated WITH CHECK ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_user_encrypted_secrets ON rls_encrypted.user_encrypted_secrets FOR INSERT TO authenticated WITH CHECK ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_user_encrypted_secrets ON rls_encrypted_secrets.user_encrypted_secrets FOR UPDATE TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_user_encrypted_secrets ON rls_encrypted.user_encrypted_secrets FOR UPDATE TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_user_encrypted_secrets ON rls_encrypted_secrets.user_encrypted_secrets FOR DELETE TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_user_encrypted_secrets ON rls_encrypted.user_encrypted_secrets FOR DELETE TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
-GRANT SELECT ON TABLE rls_encrypted_secrets.user_encrypted_secrets TO authenticated;
+GRANT SELECT ON TABLE rls_encrypted.user_encrypted_secrets TO authenticated;
 
-GRANT INSERT ON TABLE rls_encrypted_secrets.user_encrypted_secrets TO authenticated;
+GRANT INSERT ON TABLE rls_encrypted.user_encrypted_secrets TO authenticated;
 
-GRANT UPDATE ON TABLE rls_encrypted_secrets.user_encrypted_secrets TO authenticated;
+GRANT UPDATE ON TABLE rls_encrypted.user_encrypted_secrets TO authenticated;
 
-GRANT DELETE ON TABLE rls_encrypted_secrets.user_encrypted_secrets TO authenticated;
+GRANT DELETE ON TABLE rls_encrypted.user_encrypted_secrets TO authenticated;
 
 ALTER TABLE rls_simple_secrets.user_secrets ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_user_secrets ON rls_simple_secrets.user_secrets FOR SELECT TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_user_secrets ON rls_simple_secrets.user_secrets FOR SELECT TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_insert_on_user_secrets ON rls_simple_secrets.user_secrets FOR INSERT TO authenticated WITH CHECK ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_user_secrets ON rls_simple_secrets.user_secrets FOR INSERT TO authenticated WITH CHECK ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_user_secrets ON rls_simple_secrets.user_secrets FOR UPDATE TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_user_secrets ON rls_simple_secrets.user_secrets FOR UPDATE TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_user_secrets ON rls_simple_secrets.user_secrets FOR DELETE TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_user_secrets ON rls_simple_secrets.user_secrets FOR DELETE TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE rls_simple_secrets.user_secrets TO authenticated;
 
@@ -780,13 +710,13 @@ GRANT DELETE ON TABLE rls_simple_secrets.user_secrets TO authenticated;
 
 ALTER TABLE rls_roles_private.api_tokens ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_api_tokens ON rls_roles_private.api_tokens FOR SELECT TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_api_tokens ON rls_roles_private.api_tokens FOR SELECT TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_insert_on_api_tokens ON rls_roles_private.api_tokens FOR INSERT TO authenticated WITH CHECK ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_api_tokens ON rls_roles_private.api_tokens FOR INSERT TO authenticated WITH CHECK ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_api_tokens ON rls_roles_private.api_tokens FOR UPDATE TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_api_tokens ON rls_roles_private.api_tokens FOR UPDATE TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_api_tokens ON rls_roles_private.api_tokens FOR DELETE TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_api_tokens ON rls_roles_private.api_tokens FOR DELETE TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE rls_roles_private.api_tokens TO authenticated;
 
@@ -830,13 +760,13 @@ ALTER TABLE rls_public.emails ADD CONSTRAINT emails_owner_id_key UNIQUE ( owner_
 
 ALTER TABLE rls_public.emails ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_emails ON rls_public.emails FOR SELECT TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_emails ON rls_public.emails FOR SELECT TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_insert_on_emails ON rls_public.emails FOR INSERT TO authenticated WITH CHECK ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_emails ON rls_public.emails FOR INSERT TO authenticated WITH CHECK ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_emails ON rls_public.emails FOR UPDATE TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_emails ON rls_public.emails FOR UPDATE TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_emails ON rls_public.emails FOR DELETE TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_emails ON rls_public.emails FOR DELETE TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE rls_public.emails TO authenticated;
 
@@ -872,7 +802,7 @@ ALTER TABLE rls_public.invites ADD COLUMN  sender_id uuid;
 
 ALTER TABLE rls_public.invites ALTER COLUMN sender_id SET NOT NULL;
 
-ALTER TABLE rls_public.invites ALTER COLUMN sender_id SET DEFAULT rls_roles_public.get_current_user_id();
+ALTER TABLE rls_public.invites ALTER COLUMN sender_id SET DEFAULT jwt_public.current_user_id();
 
 ALTER TABLE rls_public.invites ADD COLUMN  invite_token text;
 
@@ -930,19 +860,19 @@ CREATE INDEX invites_sender_id_idx ON rls_public.invites ( sender_id );
 
 ALTER TABLE rls_public.invites ADD CONSTRAINT invites_sender_id_fkey FOREIGN KEY ( sender_id ) REFERENCES rls_public.users ( id ) ON DELETE CASCADE;
 
-CREATE POLICY authenticated_can_insert_on_invites ON rls_public.invites FOR INSERT TO authenticated WITH CHECK ( sender_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_invites ON rls_public.invites FOR INSERT TO authenticated WITH CHECK ( sender_id = jwt_public.current_user_id() );
 
 GRANT INSERT ( email, invite_limit, multiple, expires_at ) ON TABLE rls_public.invites TO authenticated;
 
-CREATE POLICY authenticated_can_update_on_invites ON rls_public.invites FOR UPDATE TO authenticated USING ( sender_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_invites ON rls_public.invites FOR UPDATE TO authenticated USING ( sender_id = jwt_public.current_user_id() );
 
 GRANT UPDATE ( expires_at ) ON TABLE rls_public.invites TO authenticated;
 
-CREATE POLICY authenticated_can_select_on_invites ON rls_public.invites FOR SELECT TO authenticated USING ( sender_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_invites ON rls_public.invites FOR SELECT TO authenticated USING ( sender_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE rls_public.invites TO authenticated;
 
-CREATE POLICY authenticated_can_delete_on_invites ON rls_public.invites FOR DELETE TO authenticated USING ( sender_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_invites ON rls_public.invites FOR DELETE TO authenticated USING ( sender_id = jwt_public.current_user_id() );
 
 GRANT DELETE ON TABLE rls_public.invites TO authenticated;
 
@@ -984,7 +914,7 @@ CREATE INDEX claimed_invites_sender_id_idx ON rls_public.claimed_invites ( sende
 
 CREATE INDEX claimed_invites_receiver_id_idx ON rls_public.claimed_invites ( receiver_id );
 
-CREATE POLICY authenticated_can_select_on_claimed_invites ON rls_public.claimed_invites FOR SELECT TO authenticated USING ( sender_id = rls_roles_public.get_current_user_id() OR receiver_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_claimed_invites ON rls_public.claimed_invites FOR SELECT TO authenticated USING ( sender_id = jwt_public.current_user_id() OR receiver_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE rls_public.claimed_invites TO authenticated;
 
@@ -995,7 +925,7 @@ DECLARE
   v_invite "rls_public".invites;
 BEGIN
   SELECT * FROM "rls_public".users
-  WHERE id = "rls_roles_public".get_current_user_id ()
+  WHERE id = jwt_public.current_user_id ()
   INTO v_user;
   IF (NOT FOUND) THEN
     RAISE EXCEPTION 'OBJECT_NOT_FOUND';
@@ -1043,12 +973,14 @@ CREATE FUNCTION rls_private.after_insert_invite_add_job_tg (  ) RETURNS trigger 
 BEGIN
     IF (NEW.email IS NOT NULL) THEN 
         PERFORM
-            app_jobs.add_job ('send_email_link',
+            app_jobs.add_job (
+                jwt_private.current_database_id(),
+                'send_email_link',
                 json_build_object(
-                'email_type', 'invite_email',
-                'email', NEW.email,
-                'sender_id', NEW.sender_id,
-                'invite_token', NEW.invite_token
+                    'email_type', 'invite_email',
+                    'email', NEW.email,
+                    'sender_id', NEW.sender_id,
+                    'invite_token', NEW.invite_token
                 )
             );
     END IF;
@@ -1116,7 +1048,7 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'ACCOUNT_LOCKED_EXCEED_ATTEMPTS';
   END IF;
-  IF ("rls_encrypted_secrets".verify(v_email.owner_id, 'password_hash', PASSWORD)) THEN
+  IF ("rls_encrypted".verify(v_email.owner_id, 'password_hash', PASSWORD)) THEN
     PERFORM "rls_simple_secrets".del(v_email.owner_id,
     ARRAY[
       'password_attempts', 'first_failed_password_attempt'
@@ -1212,7 +1144,7 @@ BEGIN
       RETURNING
         * INTO v_token;
     END IF;
-    PERFORM "rls_encrypted_secrets".set
+    PERFORM "rls_encrypted".set
       (v_user.id, 'password_hash', trim(password), 'crypt');
     RETURN v_token;
   END IF;
@@ -1251,19 +1183,19 @@ BEGIN
   FROM
     "rls_public".users AS u
   WHERE
-    id = "rls_roles_public".get_current_user_id ();
+    id = jwt_public.current_user_id ();
   IF (NOT FOUND) THEN
     RETURN FALSE;
   END IF;
   SELECT EXISTS (
     SELECT 1
-      FROM "rls_encrypted_secrets".user_encrypted_secrets
+      FROM "rls_encrypted".user_encrypted_secrets
       WHERE owner_id=v_user.id
         AND name='password_hash'
   )
   INTO password_exists;
   IF (password_exists IS TRUE) THEN 
-    IF ("rls_encrypted_secrets".verify(
+    IF ("rls_encrypted".verify(
         v_user.id,
         'password_hash',
         current_password
@@ -1271,7 +1203,7 @@ BEGIN
       RAISE EXCEPTION 'INCORRECT_PASSWORD';
     END IF;
   END IF;
-  PERFORM "rls_encrypted_secrets".set
+  PERFORM "rls_encrypted".set
     (v_user.id, 'password_hash', new_password, 'crypt');
       
   RETURN TRUE;
@@ -1309,8 +1241,8 @@ BEGIN
         RAISE
         EXCEPTION 'PASSWORD_RESET_LOCKED_EXCEED_ATTEMPTS';
     END IF;
-    IF ("rls_encrypted_secrets".verify(v_user.id, 'reset_password_token', reset_token)) THEN
-        PERFORM "rls_encrypted_secrets".set
+    IF ("rls_encrypted".verify(v_user.id, 'reset_password_token', reset_token)) THEN
+        PERFORM "rls_encrypted".set
             (v_user.id, 'password_hash', new_password, 'crypt');
         PERFORM "rls_simple_secrets".del(
             v_user.id,
@@ -1322,7 +1254,7 @@ BEGIN
                 'first_failed_reset_password_attempt'                
             ]
         );
-        PERFORM "rls_encrypted_secrets".del(
+        PERFORM "rls_encrypted".del(
             v_user.id,
             'reset_password_token'
         );
@@ -1373,11 +1305,13 @@ BEGIN
         RETURN;
     END IF;
     v_reset_token = encode(gen_random_bytes(7), 'hex');
-    PERFORM "rls_encrypted_secrets".set
+    PERFORM "rls_encrypted".set
         (v_user_id, 'reset_password_token', v_reset_token, 'crypt');
     PERFORM "rls_simple_secrets".set(v_user_id, 'password_reset_email_sent_at', (NOW())::text);
     PERFORM
-        app_jobs.add_job ('send_email_link',
+        app_jobs.add_job (
+            jwt_private.current_database_id(),
+            'send_email_link',
             json_build_object(
                 'email_type', 'forgot_password',
                 'user_id', v_user_id,
@@ -1413,7 +1347,7 @@ BEGIN
         'verification_email_attempts',
         'first_failed_verification_email_attempt'
     ]);
-    PERFORM "rls_encrypted_secrets".del(v_email.owner_id, ARRAY[
+    PERFORM "rls_encrypted".del(v_email.owner_id, ARRAY[
         verification_token_name
     ]);
     RETURN FALSE;
@@ -1431,18 +1365,21 @@ BEGIN
     verification_email_sent_at IS NOT NULL AND
     NOW() < verification_email_sent_at + v_verification_min_duration_between_new_tokens 
   ) THEN 
-    v_verification_token = "rls_encrypted_secrets".get
+    v_verification_token = "rls_encrypted".get
         (v_user_id, verification_token_name, encode(gen_random_bytes(10), 'hex'));
   ELSE
     v_verification_token = encode(gen_random_bytes(10), 'hex');
   END IF;
   verification_email_sent_at = NOW();
+  
   PERFORM "rls_simple_secrets".set
     (v_user_id, 'verification_email_sent_at', verification_email_sent_at);
-  PERFORM "rls_encrypted_secrets".set
+  PERFORM "rls_encrypted".set
     (v_user_id, verification_token_name, v_verification_token, 'pgp');
   PERFORM
-      app_jobs.add_job ('send_email_link',
+      app_jobs.add_job (
+        jwt_private.current_database_id(),
+        'send_email_link',
         json_build_object(
           'email_type', 'email_verification',
           'email_id', v_email.id,
@@ -1486,11 +1423,11 @@ BEGIN
         'verification_email_attempts',
         'first_failed_verification_email_attempt'
     ]);
-    PERFORM "rls_encrypted_secrets".del(v_user_id, verification_token_name);
+    PERFORM "rls_encrypted".del(v_user_id, verification_token_name);
     RETURN FALSE;
   END IF;
   verification_token_name = v_email.email::text || '_verification_token';
-  IF ("rls_encrypted_secrets".verify (v_user_id, verification_token_name, verify_email.token) ) THEN
+  IF ("rls_encrypted".verify (v_user_id, verification_token_name, verify_email.token) ) THEN
     UPDATE "rls_public".emails e
         SET is_verified = TRUE
     WHERE e.id = verify_email.email_id;
@@ -1499,7 +1436,7 @@ BEGIN
         'verification_email_attempts',
         'first_failed_verification_email_attempt'
     ]);
-    PERFORM "rls_encrypted_secrets".del(v_user_id, verification_token_name);
+    PERFORM "rls_encrypted".del(v_user_id, verification_token_name);
     RETURN TRUE;
   ELSE
     IF (
@@ -1544,10 +1481,10 @@ ALTER TABLE rls_public.user_profiles ADD COLUMN  created_by uuid;
 
 ALTER TABLE rls_public.user_profiles ADD COLUMN  updated_by uuid;
 
-CREATE TRIGGER tg_peoplestamps 
+CREATE TRIGGER peoplestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.user_profiles 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_peoplestamps (  );
+ EXECUTE PROCEDURE stamps. peoplestamps (  );
 
 ALTER TABLE rls_public.user_profiles ADD COLUMN  created_at timestamptz;
 
@@ -1557,10 +1494,10 @@ ALTER TABLE rls_public.user_profiles ADD COLUMN  updated_at timestamptz;
 
 ALTER TABLE rls_public.user_profiles ALTER COLUMN updated_at SET DEFAULT now();
 
-CREATE TRIGGER tg_timestamps 
+CREATE TRIGGER timestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.user_profiles 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_timestamps (  );
+ EXECUTE PROCEDURE stamps. timestamps (  );
 
 ALTER TABLE rls_public.user_profiles ADD COLUMN  user_id uuid;
 
@@ -1578,11 +1515,11 @@ COMMENT ON CONSTRAINT user_profiles_user_id_key ON rls_public.user_profiles IS N
 
 ALTER TABLE rls_public.user_profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_insert_on_user_profiles ON rls_public.user_profiles FOR INSERT TO authenticated WITH CHECK ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_user_profiles ON rls_public.user_profiles FOR INSERT TO authenticated WITH CHECK ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_user_profiles ON rls_public.user_profiles FOR UPDATE TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_user_profiles ON rls_public.user_profiles FOR UPDATE TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_user_profiles ON rls_public.user_profiles FOR DELETE TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_user_profiles ON rls_public.user_profiles FOR DELETE TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
 GRANT INSERT ON TABLE rls_public.user_profiles TO authenticated;
 
@@ -1644,10 +1581,10 @@ ALTER TABLE rls_public.addresses ADD COLUMN  created_by uuid;
 
 ALTER TABLE rls_public.addresses ADD COLUMN  updated_by uuid;
 
-CREATE TRIGGER tg_peoplestamps 
+CREATE TRIGGER peoplestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.addresses 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_peoplestamps (  );
+ EXECUTE PROCEDURE stamps. peoplestamps (  );
 
 ALTER TABLE rls_public.addresses ADD COLUMN  created_at timestamptz;
 
@@ -1657,10 +1594,10 @@ ALTER TABLE rls_public.addresses ADD COLUMN  updated_at timestamptz;
 
 ALTER TABLE rls_public.addresses ALTER COLUMN updated_at SET DEFAULT now();
 
-CREATE TRIGGER tg_timestamps 
+CREATE TRIGGER timestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.addresses 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_timestamps (  );
+ EXECUTE PROCEDURE stamps. timestamps (  );
 
 ALTER TABLE rls_public.addresses ADD COLUMN  owner_id uuid;
 
@@ -1700,10 +1637,10 @@ ALTER TABLE rls_public.organization_settings ADD COLUMN  created_by uuid;
 
 ALTER TABLE rls_public.organization_settings ADD COLUMN  updated_by uuid;
 
-CREATE TRIGGER tg_peoplestamps 
+CREATE TRIGGER peoplestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.organization_settings 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_peoplestamps (  );
+ EXECUTE PROCEDURE stamps. peoplestamps (  );
 
 ALTER TABLE rls_public.organization_settings ADD COLUMN  created_at timestamptz;
 
@@ -1713,10 +1650,10 @@ ALTER TABLE rls_public.organization_settings ADD COLUMN  updated_at timestamptz;
 
 ALTER TABLE rls_public.organization_settings ALTER COLUMN updated_at SET DEFAULT now();
 
-CREATE TRIGGER tg_timestamps 
+CREATE TRIGGER timestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.organization_settings 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_timestamps (  );
+ EXECUTE PROCEDURE stamps. timestamps (  );
 
 ALTER TABLE rls_public.organization_settings ADD COLUMN  organization_id uuid;
 
@@ -1734,13 +1671,13 @@ COMMENT ON CONSTRAINT organization_settings_organization_id_key ON rls_public.or
 
 ALTER TABLE rls_public.organization_settings ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_organization_settings ON rls_public.organization_settings FOR SELECT TO authenticated USING ( organization_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_organization_settings ON rls_public.organization_settings FOR SELECT TO authenticated USING ( organization_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_insert_on_organization_settings ON rls_public.organization_settings FOR INSERT TO authenticated WITH CHECK ( organization_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_organization_settings ON rls_public.organization_settings FOR INSERT TO authenticated WITH CHECK ( organization_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_organization_settings ON rls_public.organization_settings FOR UPDATE TO authenticated USING ( organization_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_organization_settings ON rls_public.organization_settings FOR UPDATE TO authenticated USING ( organization_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_organization_settings ON rls_public.organization_settings FOR DELETE TO authenticated USING ( organization_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_organization_settings ON rls_public.organization_settings FOR DELETE TO authenticated USING ( organization_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE rls_public.organization_settings TO authenticated;
 
@@ -1776,10 +1713,10 @@ ALTER TABLE rls_public.user_settings ADD COLUMN  created_by uuid;
 
 ALTER TABLE rls_public.user_settings ADD COLUMN  updated_by uuid;
 
-CREATE TRIGGER tg_peoplestamps 
+CREATE TRIGGER peoplestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.user_settings 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_peoplestamps (  );
+ EXECUTE PROCEDURE stamps. peoplestamps (  );
 
 ALTER TABLE rls_public.user_settings ADD COLUMN  created_at timestamptz;
 
@@ -1789,10 +1726,10 @@ ALTER TABLE rls_public.user_settings ADD COLUMN  updated_at timestamptz;
 
 ALTER TABLE rls_public.user_settings ALTER COLUMN updated_at SET DEFAULT now();
 
-CREATE TRIGGER tg_timestamps 
+CREATE TRIGGER timestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.user_settings 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_timestamps (  );
+ EXECUTE PROCEDURE stamps. timestamps (  );
 
 ALTER TABLE rls_public.user_settings ADD COLUMN  user_id uuid;
 
@@ -1810,13 +1747,13 @@ COMMENT ON CONSTRAINT user_settings_user_id_key ON rls_public.user_settings IS N
 
 ALTER TABLE rls_public.user_settings ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_user_settings ON rls_public.user_settings FOR SELECT TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_user_settings ON rls_public.user_settings FOR SELECT TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_insert_on_user_settings ON rls_public.user_settings FOR INSERT TO authenticated WITH CHECK ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_user_settings ON rls_public.user_settings FOR INSERT TO authenticated WITH CHECK ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_user_settings ON rls_public.user_settings FOR UPDATE TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_user_settings ON rls_public.user_settings FOR UPDATE TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_user_settings ON rls_public.user_settings FOR DELETE TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_user_settings ON rls_public.user_settings FOR DELETE TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE rls_public.user_settings TO authenticated;
 
@@ -1852,10 +1789,10 @@ ALTER TABLE rls_public.user_characteristics ADD COLUMN  created_by uuid;
 
 ALTER TABLE rls_public.user_characteristics ADD COLUMN  updated_by uuid;
 
-CREATE TRIGGER tg_peoplestamps 
+CREATE TRIGGER peoplestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.user_characteristics 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_peoplestamps (  );
+ EXECUTE PROCEDURE stamps. peoplestamps (  );
 
 ALTER TABLE rls_public.user_characteristics ADD COLUMN  created_at timestamptz;
 
@@ -1865,10 +1802,10 @@ ALTER TABLE rls_public.user_characteristics ADD COLUMN  updated_at timestamptz;
 
 ALTER TABLE rls_public.user_characteristics ALTER COLUMN updated_at SET DEFAULT now();
 
-CREATE TRIGGER tg_timestamps 
+CREATE TRIGGER timestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.user_characteristics 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_timestamps (  );
+ EXECUTE PROCEDURE stamps. timestamps (  );
 
 ALTER TABLE rls_public.user_characteristics ADD COLUMN  user_id uuid;
 
@@ -1886,13 +1823,13 @@ COMMENT ON CONSTRAINT user_characteristics_user_id_key ON rls_public.user_charac
 
 ALTER TABLE rls_public.user_characteristics ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_user_characteristics ON rls_public.user_characteristics FOR SELECT TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_user_characteristics ON rls_public.user_characteristics FOR SELECT TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_insert_on_user_characteristics ON rls_public.user_characteristics FOR INSERT TO authenticated WITH CHECK ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_user_characteristics ON rls_public.user_characteristics FOR INSERT TO authenticated WITH CHECK ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_user_characteristics ON rls_public.user_characteristics FOR UPDATE TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_user_characteristics ON rls_public.user_characteristics FOR UPDATE TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_user_characteristics ON rls_public.user_characteristics FOR DELETE TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_user_characteristics ON rls_public.user_characteristics FOR DELETE TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE rls_public.user_characteristics TO authenticated;
 
@@ -1934,10 +1871,10 @@ ALTER TABLE rls_public.user_contacts ADD COLUMN  created_by uuid;
 
 ALTER TABLE rls_public.user_contacts ADD COLUMN  updated_by uuid;
 
-CREATE TRIGGER tg_peoplestamps 
+CREATE TRIGGER peoplestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.user_contacts 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_peoplestamps (  );
+ EXECUTE PROCEDURE stamps. peoplestamps (  );
 
 ALTER TABLE rls_public.user_contacts ADD COLUMN  created_at timestamptz;
 
@@ -1947,10 +1884,10 @@ ALTER TABLE rls_public.user_contacts ADD COLUMN  updated_at timestamptz;
 
 ALTER TABLE rls_public.user_contacts ALTER COLUMN updated_at SET DEFAULT now();
 
-CREATE TRIGGER tg_timestamps 
+CREATE TRIGGER timestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.user_contacts 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_timestamps (  );
+ EXECUTE PROCEDURE stamps. timestamps (  );
 
 ALTER TABLE rls_public.user_contacts ADD COLUMN  user_id uuid;
 
@@ -1964,13 +1901,13 @@ CREATE INDEX user_contacts_user_id_idx ON rls_public.user_contacts ( user_id );
 
 ALTER TABLE rls_public.user_contacts ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_user_contacts ON rls_public.user_contacts FOR SELECT TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_user_contacts ON rls_public.user_contacts FOR SELECT TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_insert_on_user_contacts ON rls_public.user_contacts FOR INSERT TO authenticated WITH CHECK ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_user_contacts ON rls_public.user_contacts FOR INSERT TO authenticated WITH CHECK ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_user_contacts ON rls_public.user_contacts FOR UPDATE TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_user_contacts ON rls_public.user_contacts FOR UPDATE TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_user_contacts ON rls_public.user_contacts FOR DELETE TO authenticated USING ( user_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_user_contacts ON rls_public.user_contacts FOR DELETE TO authenticated USING ( user_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE rls_public.user_contacts TO authenticated;
 
@@ -2000,10 +1937,10 @@ ALTER TABLE rls_public.user_connections ADD COLUMN  created_by uuid;
 
 ALTER TABLE rls_public.user_connections ADD COLUMN  updated_by uuid;
 
-CREATE TRIGGER tg_peoplestamps 
+CREATE TRIGGER peoplestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.user_connections 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_peoplestamps (  );
+ EXECUTE PROCEDURE stamps. peoplestamps (  );
 
 ALTER TABLE rls_public.user_connections ADD COLUMN  created_at timestamptz;
 
@@ -2013,10 +1950,10 @@ ALTER TABLE rls_public.user_connections ADD COLUMN  updated_at timestamptz;
 
 ALTER TABLE rls_public.user_connections ALTER COLUMN updated_at SET DEFAULT now();
 
-CREATE TRIGGER tg_timestamps 
+CREATE TRIGGER timestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.user_connections 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_timestamps (  );
+ EXECUTE PROCEDURE stamps. timestamps (  );
 
 ALTER TABLE rls_public.user_connections ADD COLUMN  requester_id uuid;
 
@@ -2044,19 +1981,19 @@ COMMENT ON CONSTRAINT user_connections_requester_id_responder_id_key ON rls_publ
 
 ALTER TABLE rls_public.user_connections ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_user_connections ON rls_public.user_connections FOR SELECT TO authenticated USING ( responder_id = rls_roles_public.get_current_user_id() OR requester_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_user_connections ON rls_public.user_connections FOR SELECT TO authenticated USING ( responder_id = jwt_public.current_user_id() OR requester_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_user_connections ON rls_public.user_connections FOR DELETE TO authenticated USING ( responder_id = rls_roles_public.get_current_user_id() OR requester_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_user_connections ON rls_public.user_connections FOR DELETE TO authenticated USING ( responder_id = jwt_public.current_user_id() OR requester_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE rls_public.user_connections TO authenticated;
 
 GRANT DELETE ON TABLE rls_public.user_connections TO authenticated;
 
-CREATE POLICY authenticated_can_update_on_user_connections ON rls_public.user_connections FOR UPDATE TO authenticated USING ( responder_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_user_connections ON rls_public.user_connections FOR UPDATE TO authenticated USING ( responder_id = jwt_public.current_user_id() );
 
 GRANT UPDATE ( accepted ) ON TABLE rls_public.user_connections TO authenticated;
 
-CREATE POLICY authenticated_can_insert_on_user_connections ON rls_public.user_connections FOR INSERT TO authenticated WITH CHECK ( requester_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_user_connections ON rls_public.user_connections FOR INSERT TO authenticated WITH CHECK ( requester_id = jwt_public.current_user_id() );
 
 GRANT INSERT ON TABLE rls_public.user_connections TO authenticated;
 
@@ -2084,10 +2021,10 @@ ALTER TABLE rls_public.organization_profiles ADD COLUMN  created_by uuid;
 
 ALTER TABLE rls_public.organization_profiles ADD COLUMN  updated_by uuid;
 
-CREATE TRIGGER tg_peoplestamps 
+CREATE TRIGGER peoplestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.organization_profiles 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_peoplestamps (  );
+ EXECUTE PROCEDURE stamps. peoplestamps (  );
 
 ALTER TABLE rls_public.organization_profiles ADD COLUMN  created_at timestamptz;
 
@@ -2097,10 +2034,10 @@ ALTER TABLE rls_public.organization_profiles ADD COLUMN  updated_at timestamptz;
 
 ALTER TABLE rls_public.organization_profiles ALTER COLUMN updated_at SET DEFAULT now();
 
-CREATE TRIGGER tg_timestamps 
+CREATE TRIGGER timestamps_tg 
  BEFORE INSERT OR UPDATE ON rls_public.organization_profiles 
  FOR EACH ROW
- EXECUTE PROCEDURE rls_private. tg_timestamps (  );
+ EXECUTE PROCEDURE stamps. timestamps (  );
 
 ALTER TABLE rls_public.organization_profiles ADD COLUMN  organization_id uuid;
 
@@ -2118,11 +2055,11 @@ COMMENT ON CONSTRAINT organization_profiles_organization_id_key ON rls_public.or
 
 ALTER TABLE rls_public.organization_profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_insert_on_organization_profiles ON rls_public.organization_profiles FOR INSERT TO authenticated WITH CHECK ( organization_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_organization_profiles ON rls_public.organization_profiles FOR INSERT TO authenticated WITH CHECK ( organization_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_organization_profiles ON rls_public.organization_profiles FOR UPDATE TO authenticated USING ( organization_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_organization_profiles ON rls_public.organization_profiles FOR UPDATE TO authenticated USING ( organization_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_organization_profiles ON rls_public.organization_profiles FOR DELETE TO authenticated USING ( organization_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_organization_profiles ON rls_public.organization_profiles FOR DELETE TO authenticated USING ( organization_id = jwt_public.current_user_id() );
 
 GRANT INSERT ON TABLE rls_public.organization_profiles TO authenticated;
 
@@ -2158,13 +2095,13 @@ CREATE TRIGGER emails_update_status_achievement_is_verified_tg
 
 ALTER TABLE collections_public.database ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_database ON collections_public.database FOR SELECT TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_select_on_database ON collections_public.database FOR SELECT TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_insert_on_database ON collections_public.database FOR INSERT TO authenticated WITH CHECK ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_insert_on_database ON collections_public.database FOR INSERT TO authenticated WITH CHECK ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_update_on_database ON collections_public.database FOR UPDATE TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_update_on_database ON collections_public.database FOR UPDATE TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
-CREATE POLICY authenticated_can_delete_on_database ON collections_public.database FOR DELETE TO authenticated USING ( owner_id = rls_roles_public.get_current_user_id() );
+CREATE POLICY authenticated_can_delete_on_database ON collections_public.database FOR DELETE TO authenticated USING ( owner_id = jwt_public.current_user_id() );
 
 GRANT SELECT ON TABLE collections_public.database TO authenticated;
 
@@ -2176,13 +2113,13 @@ GRANT DELETE ON TABLE collections_public.database TO authenticated;
 
 ALTER TABLE collections_public.schema ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_schema ON collections_public.schema FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_schema ON collections_public.schema FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_schema ON collections_public.schema FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_schema ON collections_public.schema FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_schema ON collections_public.schema FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_schema ON collections_public.schema FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_schema ON collections_public.schema FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_schema ON collections_public.schema FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.schema TO authenticated;
 
@@ -2194,13 +2131,13 @@ GRANT DELETE ON TABLE collections_public.schema TO authenticated;
 
 ALTER TABLE collections_public.foreign_key_constraint ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_foreign_key_constraint ON collections_public.foreign_key_constraint FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_foreign_key_constraint ON collections_public.foreign_key_constraint FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_foreign_key_constraint ON collections_public.foreign_key_constraint FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_foreign_key_constraint ON collections_public.foreign_key_constraint FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_foreign_key_constraint ON collections_public.foreign_key_constraint FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_foreign_key_constraint ON collections_public.foreign_key_constraint FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_foreign_key_constraint ON collections_public.foreign_key_constraint FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_foreign_key_constraint ON collections_public.foreign_key_constraint FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.foreign_key_constraint TO authenticated;
 
@@ -2212,13 +2149,13 @@ GRANT DELETE ON TABLE collections_public.foreign_key_constraint TO authenticated
 
 ALTER TABLE collections_public.full_text_search ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_full_text_search ON collections_public.full_text_search FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_full_text_search ON collections_public.full_text_search FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_full_text_search ON collections_public.full_text_search FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_full_text_search ON collections_public.full_text_search FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_full_text_search ON collections_public.full_text_search FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_full_text_search ON collections_public.full_text_search FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_full_text_search ON collections_public.full_text_search FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_full_text_search ON collections_public.full_text_search FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.full_text_search TO authenticated;
 
@@ -2230,13 +2167,13 @@ GRANT DELETE ON TABLE collections_public.full_text_search TO authenticated;
 
 ALTER TABLE collections_public.index ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_index ON collections_public.index FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_index ON collections_public.index FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_index ON collections_public.index FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_index ON collections_public.index FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_index ON collections_public.index FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_index ON collections_public.index FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_index ON collections_public.index FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_index ON collections_public.index FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.index TO authenticated;
 
@@ -2248,13 +2185,13 @@ GRANT DELETE ON TABLE collections_public.index TO authenticated;
 
 ALTER TABLE collections_public.rls_function ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_rls_function ON collections_public.rls_function FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_rls_function ON collections_public.rls_function FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_rls_function ON collections_public.rls_function FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_rls_function ON collections_public.rls_function FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_rls_function ON collections_public.rls_function FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_rls_function ON collections_public.rls_function FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_rls_function ON collections_public.rls_function FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_rls_function ON collections_public.rls_function FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.rls_function TO authenticated;
 
@@ -2266,13 +2203,13 @@ GRANT DELETE ON TABLE collections_public.rls_function TO authenticated;
 
 ALTER TABLE collections_public.policy ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_policy ON collections_public.policy FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_policy ON collections_public.policy FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_policy ON collections_public.policy FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_policy ON collections_public.policy FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_policy ON collections_public.policy FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_policy ON collections_public.policy FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_policy ON collections_public.policy FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_policy ON collections_public.policy FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.policy TO authenticated;
 
@@ -2284,13 +2221,13 @@ GRANT DELETE ON TABLE collections_public.policy TO authenticated;
 
 ALTER TABLE collections_public.primary_key_constraint ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_primary_key_constraint ON collections_public.primary_key_constraint FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_primary_key_constraint ON collections_public.primary_key_constraint FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_primary_key_constraint ON collections_public.primary_key_constraint FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_primary_key_constraint ON collections_public.primary_key_constraint FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_primary_key_constraint ON collections_public.primary_key_constraint FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_primary_key_constraint ON collections_public.primary_key_constraint FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_primary_key_constraint ON collections_public.primary_key_constraint FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_primary_key_constraint ON collections_public.primary_key_constraint FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.primary_key_constraint TO authenticated;
 
@@ -2302,13 +2239,13 @@ GRANT DELETE ON TABLE collections_public.primary_key_constraint TO authenticated
 
 ALTER TABLE collections_public.procedure ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_procedure ON collections_public.procedure FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_procedure ON collections_public.procedure FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_procedure ON collections_public.procedure FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_procedure ON collections_public.procedure FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_procedure ON collections_public.procedure FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_procedure ON collections_public.procedure FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_procedure ON collections_public.procedure FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_procedure ON collections_public.procedure FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.procedure TO authenticated;
 
@@ -2320,13 +2257,13 @@ GRANT DELETE ON TABLE collections_public.procedure TO authenticated;
 
 ALTER TABLE collections_public.schema_grant ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_schema_grant ON collections_public.schema_grant FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_schema_grant ON collections_public.schema_grant FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_schema_grant ON collections_public.schema_grant FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_schema_grant ON collections_public.schema_grant FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_schema_grant ON collections_public.schema_grant FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_schema_grant ON collections_public.schema_grant FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_schema_grant ON collections_public.schema_grant FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_schema_grant ON collections_public.schema_grant FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.schema_grant TO authenticated;
 
@@ -2338,13 +2275,13 @@ GRANT DELETE ON TABLE collections_public.schema_grant TO authenticated;
 
 ALTER TABLE collections_public.table_grant ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_table_grant ON collections_public.table_grant FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_table_grant ON collections_public.table_grant FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_table_grant ON collections_public.table_grant FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_table_grant ON collections_public.table_grant FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_table_grant ON collections_public.table_grant FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_table_grant ON collections_public.table_grant FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_table_grant ON collections_public.table_grant FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_table_grant ON collections_public.table_grant FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.table_grant TO authenticated;
 
@@ -2356,13 +2293,13 @@ GRANT DELETE ON TABLE collections_public.table_grant TO authenticated;
 
 ALTER TABLE collections_public.trigger ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_trigger ON collections_public.trigger FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_trigger ON collections_public.trigger FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_trigger ON collections_public.trigger FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_trigger ON collections_public.trigger FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_trigger ON collections_public.trigger FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_trigger ON collections_public.trigger FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_trigger ON collections_public.trigger FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_trigger ON collections_public.trigger FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.trigger TO authenticated;
 
@@ -2374,13 +2311,13 @@ GRANT DELETE ON TABLE collections_public.trigger TO authenticated;
 
 ALTER TABLE collections_public.trigger_function ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_trigger_function ON collections_public.trigger_function FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_trigger_function ON collections_public.trigger_function FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_trigger_function ON collections_public.trigger_function FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_trigger_function ON collections_public.trigger_function FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_trigger_function ON collections_public.trigger_function FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_trigger_function ON collections_public.trigger_function FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_trigger_function ON collections_public.trigger_function FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_trigger_function ON collections_public.trigger_function FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.trigger_function TO authenticated;
 
@@ -2392,13 +2329,13 @@ GRANT DELETE ON TABLE collections_public.trigger_function TO authenticated;
 
 ALTER TABLE collections_public.unique_constraint ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_unique_constraint ON collections_public.unique_constraint FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_unique_constraint ON collections_public.unique_constraint FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_unique_constraint ON collections_public.unique_constraint FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_unique_constraint ON collections_public.unique_constraint FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_unique_constraint ON collections_public.unique_constraint FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_unique_constraint ON collections_public.unique_constraint FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_unique_constraint ON collections_public.unique_constraint FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_unique_constraint ON collections_public.unique_constraint FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.unique_constraint TO authenticated;
 
@@ -2410,13 +2347,13 @@ GRANT DELETE ON TABLE collections_public.unique_constraint TO authenticated;
 
 ALTER TABLE collections_public.field ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY authenticated_can_select_on_field ON collections_public.field FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_select_on_field ON collections_public.field FOR SELECT TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_insert_on_field ON collections_public.field FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_insert_on_field ON collections_public.field FOR INSERT TO authenticated WITH CHECK ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_update_on_field ON collections_public.field FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_update_on_field ON collections_public.field FOR UPDATE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
-CREATE POLICY authenticated_can_delete_on_field ON collections_public.field FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (rls_roles_public.get_current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
+CREATE POLICY authenticated_can_delete_on_field ON collections_public.field FOR DELETE TO authenticated USING ( (SELECT p.owner_id = ANY (jwt_public.current_group_ids()) FROM collections_public.database AS p WHERE p.id = database_id) );
 
 GRANT SELECT ON TABLE collections_public.field TO authenticated;
 

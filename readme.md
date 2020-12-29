@@ -6,9 +6,8 @@
 
 * name extension `rls`
 * uncheck the `collections_public` during cli
-* delete the `svc` extension when outputs
+* before you delete the `svc` extension's output, copy it over to launchql/pg for svc
 
-CAVEAT: maybe we use `svc/meta.sql` for our svc... let's see.
 
 3. 
 
@@ -26,4 +25,10 @@ lql package
 
 ```
 lql deploy --recursive --yes --createdb --project launchql-rls
+```
+
+5. publish it then install in launchql/pg
+
+```
+lql install @pyramation/launchql-ext-rls@<version>
 ```
