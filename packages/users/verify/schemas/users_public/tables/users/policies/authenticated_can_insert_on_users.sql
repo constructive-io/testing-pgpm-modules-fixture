@@ -1,6 +1,0 @@
--- Verify: schemas/users_public/tables/users/policies/authenticated_can_insert_on_users on pg
-
-BEGIN;
-SELECT verify_policy('authenticated_can_insert_on_users', 'users_public.users');
-COMMIT;  
-

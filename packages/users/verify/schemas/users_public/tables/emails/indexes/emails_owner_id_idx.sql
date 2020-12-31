@@ -1,6 +1,0 @@
--- Verify: schemas/users_public/tables/emails/indexes/emails_owner_id_idx on pg
-
-BEGIN;
-
-COMMIT;  
-
