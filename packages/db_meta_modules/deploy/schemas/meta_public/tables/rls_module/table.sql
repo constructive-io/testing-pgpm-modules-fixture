@@ -15,10 +15,10 @@ CREATE TABLE meta_public.rls_module (
     tokens_table_id uuid NOT NULL DEFAULT uuid_nil(),
     users_table_id uuid NOT NULL DEFAULT uuid_nil(),
 
-    -- TODO add api
-    -- api_id uuid NOT NULL REFERENCES meta_public.apis (id),
-
+    --
+    
     authenticate text NOT NULL DEFAULT 'authenticate',
+    authenticate_strict text NOT NULL DEFAULT 'authenticate_strict',
     "current_role" text NOT NULL DEFAULT 'current_user',
     current_role_id text NOT NULL DEFAULT 'current_user_id',
     current_group_ids text NOT NULL DEFAULT 'current_group_ids',

@@ -26,6 +26,10 @@ CREATE TABLE meta_public.user_auth_module (
     send_verification_email_function text NOT NULL DEFAULT 'send_verification_email',
     verify_email_function text NOT NULL DEFAULT 'verify_email',
 
+    sign_in_one_time_token_function text NOT NULL DEFAULT 'login_one_time_token',
+    one_time_token_function text NOT NULL DEFAULT 'one_time_token',
+    extend_token_expires text NOT NULL DEFAULT 'extend_token_expires',
+
     -- UNIQUE(api_id),
 
     CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES collections_public.database (id) ON DELETE CASCADE,

@@ -6,6 +6,7 @@ CREATE SCHEMA collections_private;
 
 GRANT USAGE ON SCHEMA collections_private TO authenticated;
 
+-- TODO be more specific with Grants
 ALTER DEFAULT PRIVILEGES IN SCHEMA collections_private
 GRANT ALL ON TABLES TO administrator;
 
