@@ -24,11 +24,11 @@ CREATE TABLE meta_public.crypto_addresses_module (
     CONSTRAINT private_schema_fkey FOREIGN KEY (private_schema_id) REFERENCES collections_public.schema (id) ON DELETE CASCADE
 );
 
-COMMENT ON CONSTRAINT schema_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
-COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
-COMMENT ON CONSTRAINT table_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
-COMMENT ON CONSTRAINT owner_table_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
-COMMENT ON CONSTRAINT db_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
-CREATE INDEX phone_numbers_module_database_id_idx ON meta_public.phone_numbers_module ( database_id );
+COMMENT ON CONSTRAINT schema_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT table_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT owner_table_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT db_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
+CREATE INDEX crypto_addresses_module_database_id_idx ON meta_public.crypto_addresses_module ( database_id );
 
 COMMIT;
