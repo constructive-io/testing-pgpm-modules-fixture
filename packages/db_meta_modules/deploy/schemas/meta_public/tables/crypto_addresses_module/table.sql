@@ -14,7 +14,7 @@ CREATE TABLE meta_public.crypto_addresses_module (
     table_id uuid NOT NULL DEFAULT uuid_nil(),
     owner_table_id uuid NOT NULL DEFAULT uuid_nil(),
 
-    crypto_addresses_table text,
+    table_name text,
 
     --
     CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES collections_public.database (id) ON DELETE CASCADE,

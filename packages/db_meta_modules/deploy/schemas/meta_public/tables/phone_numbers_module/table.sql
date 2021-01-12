@@ -14,7 +14,7 @@ CREATE TABLE meta_public.phone_numbers_module (
     table_id uuid NOT NULL DEFAULT uuid_nil(),
     owner_table_id uuid NOT NULL DEFAULT uuid_nil(),
 
-    phone_numbers_table text,
+    table_name text,
 
     --
     CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES collections_public.database (id) ON DELETE CASCADE,
