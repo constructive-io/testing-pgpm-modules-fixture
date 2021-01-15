@@ -20,7 +20,7 @@ CREATE TABLE meta_public.crypto_auth_module (
     crypto_network text NOT NULL DEFAULT 'BTC',
     sign_in_request_challenge text NOT NULL DEFAULT 'sign_in_request_challenge',
     sign_in_record_failure text NOT NULL DEFAULT 'sign_in_record_failure',
-    sign_up_with_address text NOT NULL DEFAULT 'sign_up_with_address',
+    sign_up_with_key text NOT NULL DEFAULT 'sign_up_with_key',
     sign_in_with_challenge text NOT NULL DEFAULT 'sign_in_with_challenge',
 
     --
