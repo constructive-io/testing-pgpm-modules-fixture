@@ -14,14 +14,19 @@ CREATE TABLE meta_public.permissions_module (
     -- 
 
     --
-    type_table_id uuid NOT NULL DEFAULT uuid_nil(),
-    type_table_name text NOT NULL DEFAULT 'permission_types',
+    default_table_id uuid NOT NULL DEFAULT uuid_nil(),
+    default_table_name text NOT NULL DEFAULT 'default_permissions',
     -- 
      
+    membership_type int NOT NULL,
+    -- if this is NOT NULL, then we add entity_id 
+    -- e.g. limits to the app itself are considered global owned by app and no explicit owner
+    owner_table_id uuid NULL,
+
     CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES collections_public.database (id) ON DELETE CASCADE,
     CONSTRAINT schema_fkey FOREIGN KEY (schema_id) REFERENCES collections_public.schema (id) ON DELETE CASCADE,
     CONSTRAINT table_fkey FOREIGN KEY (table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
-    CONSTRAINT type_table_fkey FOREIGN KEY (type_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE
+    CONSTRAINT default_table_fkey FOREIGN KEY (default_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE
 );
 
 COMMENT ON CONSTRAINT schema_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
@@ -31,7 +36,7 @@ CREATE INDEX permissions_module_database_id_idx ON meta_public.permissions_modul
 COMMENT ON CONSTRAINT table_fkey
      ON meta_public.permissions_module IS E'@omit manyToMany';
 
-COMMENT ON CONSTRAINT type_table_fkey
+COMMENT ON CONSTRAINT default_table_fkey
      ON meta_public.permissions_module IS E'@omit manyToMany';
 
 COMMIT;
