@@ -1,4 +1,59 @@
 \echo Use "CREATE EXTENSION db_meta_modules" to load this file. \quit
+CREATE TABLE meta_public.connected_accounts_module (
+ 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
+	database_id uuid NOT NULL,
+	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	private_schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	owner_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_name text NOT NULL,
+	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
+	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT owner_table_fkey FOREIGN KEY ( owner_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
+	CONSTRAINT private_schema_fkey FOREIGN KEY ( private_schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE 
+);
+
+COMMENT ON CONSTRAINT schema_fkey ON meta_public.connected_accounts_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.connected_accounts_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT table_fkey ON meta_public.connected_accounts_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT owner_table_fkey ON meta_public.connected_accounts_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT db_fkey ON meta_public.connected_accounts_module IS E'@omit manyToMany';
+
+CREATE INDEX connected_accounts_module_database_id_idx ON meta_public.connected_accounts_module ( database_id );
+
+CREATE TABLE meta_public.crypto_addresses_module (
+ 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
+	database_id uuid NOT NULL,
+	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	private_schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	owner_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_name text NOT NULL,
+	crypto_network text NOT NULL DEFAULT ( 'BTC' ),
+	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
+	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT owner_table_fkey FOREIGN KEY ( owner_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
+	CONSTRAINT private_schema_fkey FOREIGN KEY ( private_schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE 
+);
+
+COMMENT ON CONSTRAINT schema_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT table_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT owner_table_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT db_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
+
+CREATE INDEX crypto_addresses_module_database_id_idx ON meta_public.crypto_addresses_module ( database_id );
+
 CREATE TABLE meta_public.crypto_auth_module (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
 	database_id uuid NOT NULL,
@@ -88,6 +143,31 @@ CREATE INDEX encrypted_secrets_module_database_id_idx ON meta_public.encrypted_s
 
 COMMENT ON CONSTRAINT table_fkey ON meta_public.encrypted_secrets_module IS E'@omit manyToMany';
 
+CREATE TABLE meta_public.field_module (
+ 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
+	database_id uuid NOT NULL,
+	private_schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	field_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	data jsonb NOT NULL DEFAULT ( '{}' ),
+	triggers text[],
+	functions text[],
+	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
+	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT field_fkey FOREIGN KEY ( field_id ) REFERENCES collections_public.field ( id ) ON DELETE CASCADE,
+	CONSTRAINT private_schema_fkey FOREIGN KEY ( private_schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE 
+);
+
+COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.field_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT table_fkey ON meta_public.field_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT field_fkey ON meta_public.field_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT db_fkey ON meta_public.field_module IS E'@omit manyToMany';
+
+CREATE INDEX field_module_database_id_idx ON meta_public.field_module ( database_id );
+
 CREATE TABLE meta_public.invites_module (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
 	database_id uuid NOT NULL,
@@ -124,6 +204,130 @@ COMMENT ON CONSTRAINT schema_fkey ON meta_public.invites_module IS E'@omit manyT
 COMMENT ON CONSTRAINT pschema_fkey ON meta_public.invites_module IS E'@omit manyToMany';
 
 CREATE INDEX invites_module_database_id_idx ON meta_public.invites_module ( database_id );
+
+CREATE TABLE meta_public.limits_module (
+ 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
+	database_id uuid NOT NULL,
+	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_name text NOT NULL DEFAULT ( 'limits' ),
+	default_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	default_table_name text NOT NULL DEFAULT ( 'default_limits' ),
+	membership_type int NOT NULL,
+	owner_table_id uuid NULL,
+	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
+	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
+	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE 
+);
+
+COMMENT ON CONSTRAINT schema_fkey ON meta_public.limits_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT db_fkey ON meta_public.limits_module IS E'@omit manyToMany';
+
+CREATE INDEX limits_module_database_id_idx ON meta_public.limits_module ( database_id );
+
+COMMENT ON CONSTRAINT table_fkey ON meta_public.limits_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT default_table_fkey ON meta_public.limits_module IS E'@omit manyToMany';
+
+CREATE TABLE meta_public.memberships_module (
+ 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
+	database_id uuid NOT NULL,
+	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	members_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	members_table_name text NOT NULL DEFAULT ( 'memberships' ),
+	grants_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	grants_table_name text NOT NULL DEFAULT ( 'grants' ),
+	users_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	limits_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	default_limits_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	permissions_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	default_permissions_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	membership_type int NOT NULL,
+	owner_table_id uuid NULL,
+	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
+	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
+	CONSTRAINT members_table_fkey FOREIGN KEY ( members_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT grants_table_fkey FOREIGN KEY ( grants_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT users_table_fkey FOREIGN KEY ( users_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT limits_table_fkey FOREIGN KEY ( limits_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT default_limits_table_fkey FOREIGN KEY ( default_limits_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT permissions_table_fkey FOREIGN KEY ( permissions_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT default_permissions_table_fkey FOREIGN KEY ( default_permissions_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE 
+);
+
+COMMENT ON CONSTRAINT schema_fkey ON meta_public.memberships_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT db_fkey ON meta_public.memberships_module IS E'@omit manyToMany';
+
+CREATE INDEX memberships_module_database_id_idx ON meta_public.memberships_module ( database_id );
+
+COMMENT ON CONSTRAINT members_table_fkey ON meta_public.memberships_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT grants_table_fkey ON meta_public.memberships_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT users_table_fkey ON meta_public.memberships_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT limits_table_fkey ON meta_public.memberships_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT default_limits_table_fkey ON meta_public.memberships_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT permissions_table_fkey ON meta_public.memberships_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT default_permissions_table_fkey ON meta_public.memberships_module IS E'@omit manyToMany';
+
+CREATE TABLE meta_public.permissions_module (
+ 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
+	database_id uuid NOT NULL,
+	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_name text NOT NULL DEFAULT ( 'permissions' ),
+	default_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	default_table_name text NOT NULL DEFAULT ( 'default_permissions' ),
+	membership_type int NOT NULL,
+	owner_table_id uuid NULL,
+	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
+	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
+	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT default_table_fkey FOREIGN KEY ( default_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE 
+);
+
+COMMENT ON CONSTRAINT schema_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT db_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
+
+CREATE INDEX permissions_module_database_id_idx ON meta_public.permissions_module ( database_id );
+
+COMMENT ON CONSTRAINT table_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT default_table_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
+
+CREATE TABLE meta_public.phone_numbers_module (
+ 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
+	database_id uuid NOT NULL,
+	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	private_schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	owner_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	table_name text NOT NULL,
+	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
+	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT owner_table_fkey FOREIGN KEY ( owner_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
+	CONSTRAINT private_schema_fkey FOREIGN KEY ( private_schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE 
+);
+
+COMMENT ON CONSTRAINT schema_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT table_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT owner_table_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT db_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
+
+CREATE INDEX phone_numbers_module_database_id_idx ON meta_public.phone_numbers_module ( database_id );
 
 CREATE TABLE meta_public.rls_module (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
@@ -309,133 +513,21 @@ COMMENT ON CONSTRAINT schema_fkey ON meta_public.uuid_module IS E'@omit manyToMa
 
 CREATE INDEX uuid_module_database_id_idx ON meta_public.uuid_module ( database_id );
 
-CREATE TABLE meta_public.phone_numbers_module (
+CREATE TABLE meta_public.membership_types_module (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
 	database_id uuid NOT NULL,
 	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	private_schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	owner_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	table_name text NOT NULL,
-	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
-	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
-	CONSTRAINT owner_table_fkey FOREIGN KEY ( owner_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
-	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
-	CONSTRAINT private_schema_fkey FOREIGN KEY ( private_schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE 
-);
-
-COMMENT ON CONSTRAINT schema_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT table_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT owner_table_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT db_fkey ON meta_public.phone_numbers_module IS E'@omit manyToMany';
-
-CREATE INDEX phone_numbers_module_database_id_idx ON meta_public.phone_numbers_module ( database_id );
-
-CREATE TABLE meta_public.crypto_addresses_module (
- 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
-	database_id uuid NOT NULL,
-	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	private_schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	owner_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	table_name text NOT NULL,
-	crypto_network text NOT NULL DEFAULT ( 'BTC' ),
-	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
-	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
-	CONSTRAINT owner_table_fkey FOREIGN KEY ( owner_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
-	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
-	CONSTRAINT private_schema_fkey FOREIGN KEY ( private_schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE 
-);
-
-COMMENT ON CONSTRAINT schema_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT table_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT owner_table_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT db_fkey ON meta_public.crypto_addresses_module IS E'@omit manyToMany';
-
-CREATE INDEX crypto_addresses_module_database_id_idx ON meta_public.crypto_addresses_module ( database_id );
-
-CREATE TABLE meta_public.connected_accounts_module (
- 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
-	database_id uuid NOT NULL,
-	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	private_schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	owner_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	table_name text NOT NULL,
-	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
-	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
-	CONSTRAINT owner_table_fkey FOREIGN KEY ( owner_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
-	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
-	CONSTRAINT private_schema_fkey FOREIGN KEY ( private_schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE 
-);
-
-COMMENT ON CONSTRAINT schema_fkey ON meta_public.connected_accounts_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.connected_accounts_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT table_fkey ON meta_public.connected_accounts_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT owner_table_fkey ON meta_public.connected_accounts_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT db_fkey ON meta_public.connected_accounts_module IS E'@omit manyToMany';
-
-CREATE INDEX connected_accounts_module_database_id_idx ON meta_public.connected_accounts_module ( database_id );
-
-CREATE TABLE meta_public.field_module (
- 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
-	database_id uuid NOT NULL,
-	private_schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	field_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	data jsonb NOT NULL DEFAULT ( '{}' ),
-	triggers text[],
-	functions text[],
-	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
-	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
-	CONSTRAINT field_fkey FOREIGN KEY ( field_id ) REFERENCES collections_public.field ( id ) ON DELETE CASCADE,
-	CONSTRAINT private_schema_fkey FOREIGN KEY ( private_schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE 
-);
-
-COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.field_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT table_fkey ON meta_public.field_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT field_fkey ON meta_public.field_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT db_fkey ON meta_public.field_module IS E'@omit manyToMany';
-
-CREATE INDEX field_module_database_id_idx ON meta_public.field_module ( database_id );
-
-CREATE TABLE meta_public.permissions_module (
- 	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
-	database_id uuid NOT NULL,
-	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	table_name text NOT NULL DEFAULT ( 'permissions' ),
-	type_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
-	type_table_name text NOT NULL DEFAULT ( 'permission_types' ),
+	membership_types_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	membership_types_table_name text NOT NULL DEFAULT ( 'membership_types' ),
 	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
 	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
-	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
-	CONSTRAINT type_table_fkey FOREIGN KEY ( type_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE 
+	CONSTRAINT membership_types_table_fkey FOREIGN KEY ( membership_types_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE 
 );
 
-COMMENT ON CONSTRAINT schema_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT schema_fkey ON meta_public.membership_types_module IS E'@omit manyToMany';
 
-COMMENT ON CONSTRAINT db_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT db_fkey ON meta_public.membership_types_module IS E'@omit manyToMany';
 
-CREATE INDEX permissions_module_database_id_idx ON meta_public.permissions_module ( database_id );
+CREATE INDEX membership_types_module_database_id_idx ON meta_public.membership_types_module ( database_id );
 
-COMMENT ON CONSTRAINT table_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
-
-COMMENT ON CONSTRAINT type_table_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT membership_types_table_fkey ON meta_public.membership_types_module IS E'@omit manyToMany';
