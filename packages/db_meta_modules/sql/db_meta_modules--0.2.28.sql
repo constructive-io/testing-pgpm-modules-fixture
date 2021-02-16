@@ -215,9 +215,12 @@ CREATE TABLE meta_public.limits_module (
 	default_table_name text NOT NULL DEFAULT ( 'default_limits' ),
 	membership_type int NOT NULL,
 	owner_table_id uuid NULL,
+	actor_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
 	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
 	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
-	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE 
+	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT default_table_fkey FOREIGN KEY ( default_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT actor_table_fkey FOREIGN KEY ( actor_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE 
 );
 
 COMMENT ON CONSTRAINT schema_fkey ON meta_public.limits_module IS E'@omit manyToMany';
@@ -229,6 +232,8 @@ CREATE INDEX limits_module_database_id_idx ON meta_public.limits_module ( databa
 COMMENT ON CONSTRAINT table_fkey ON meta_public.limits_module IS E'@omit manyToMany';
 
 COMMENT ON CONSTRAINT default_table_fkey ON meta_public.limits_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT actor_table_fkey ON meta_public.limits_module IS E'@omit manyToMany';
 
 CREATE TABLE meta_public.memberships_module (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
@@ -286,10 +291,12 @@ CREATE TABLE meta_public.permissions_module (
 	default_table_name text NOT NULL DEFAULT ( 'default_permissions' ),
 	membership_type int NOT NULL,
 	owner_table_id uuid NULL,
+	actor_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
 	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,
 	CONSTRAINT schema_fkey FOREIGN KEY ( schema_id ) REFERENCES collections_public.schema ( id ) ON DELETE CASCADE,
 	CONSTRAINT table_fkey FOREIGN KEY ( table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
-	CONSTRAINT default_table_fkey FOREIGN KEY ( default_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE 
+	CONSTRAINT default_table_fkey FOREIGN KEY ( default_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE,
+	CONSTRAINT actor_table_fkey FOREIGN KEY ( actor_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE 
 );
 
 COMMENT ON CONSTRAINT schema_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
@@ -301,6 +308,8 @@ CREATE INDEX permissions_module_database_id_idx ON meta_public.permissions_modul
 COMMENT ON CONSTRAINT table_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
 
 COMMENT ON CONSTRAINT default_table_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT actor_table_fkey ON meta_public.permissions_module IS E'@omit manyToMany';
 
 CREATE TABLE meta_public.phone_numbers_module (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
