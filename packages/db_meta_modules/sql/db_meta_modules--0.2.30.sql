@@ -239,6 +239,7 @@ CREATE TABLE meta_public.memberships_module (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
 	database_id uuid NOT NULL,
 	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
+	private_schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
 	members_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
 	members_table_name text NOT NULL DEFAULT ( 'memberships' ),
 	grants_table_id uuid NOT NULL DEFAULT ( uuid_nil() ),
