@@ -21,6 +21,11 @@ CREATE TABLE meta_public.invites_module (
     claimed_invites_table_name text NOT NULL DEFAULT 'claimed_invites',
     submit_invite_code_function text NOT NULL DEFAULT 'submit_invite_code',
 
+    membership_type int NOT NULL,
+    -- if this is NOT NULL, then we add entity_id 
+    -- e.g. limits to the app itself are considered global owned by app and no explicit owner
+    owner_table_id uuid NULL,
+
     --
     CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES collections_public.database (id) ON DELETE CASCADE,
     CONSTRAINT invites_table_fkey FOREIGN KEY (invites_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
