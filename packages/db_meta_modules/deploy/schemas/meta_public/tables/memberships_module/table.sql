@@ -34,9 +34,9 @@ CREATE TABLE meta_public.memberships_module (
 
     actor_mask_check text NOT NULL DEFAULT '',
     actor_perm_check text NOT NULL DEFAULT '',
-    entity_ids_by_mask text NOT NULL DEFAULT '',
-    entity_ids_by_perm text NOT NULL DEFAULT '',
-    entity_ids_function text NOT NULL DEFAULT '',
+    entity_ids_by_mask text NULL,
+    entity_ids_by_perm text NULL,
+    entity_ids_function text NULL,
 
     -- 
      
