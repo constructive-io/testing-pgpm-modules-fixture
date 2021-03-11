@@ -32,6 +32,12 @@ CREATE TABLE meta_public.memberships_module (
 
     --
 
+    actor_mask_check text NOT NULL DEFAULT '',
+    actor_perm_check text NOT NULL DEFAULT '',
+    entity_ids_by_mask text NOT NULL DEFAULT '',
+    entity_ids_by_perm text NOT NULL DEFAULT '',
+    entity_ids_function text NOT NULL DEFAULT '',
+_
     -- 
      
     CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES collections_public.database (id) ON DELETE CASCADE,
