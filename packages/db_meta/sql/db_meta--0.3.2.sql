@@ -3,21 +3,25 @@ CREATE SCHEMA collections_private;
 
 GRANT USAGE ON SCHEMA collections_private TO authenticated;
 
+GRANT USAGE ON SCHEMA collections_private TO administrator;
+
 ALTER DEFAULT PRIVILEGES IN SCHEMA collections_private 
  GRANT ALL ON TABLES  TO administrator;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA collections_private 
- GRANT ALL ON FUNCTIONS  TO administrator;
+ GRANT EXECUTE ON FUNCTIONS  TO administrator;
 
 CREATE SCHEMA collections_public;
 
 GRANT USAGE ON SCHEMA collections_public TO authenticated;
 
+GRANT USAGE ON SCHEMA collections_public TO administrator;
+
 ALTER DEFAULT PRIVILEGES IN SCHEMA collections_public 
  GRANT ALL ON TABLES  TO administrator;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA collections_public 
- GRANT ALL ON FUNCTIONS  TO administrator;
+ GRANT EXECUTE ON FUNCTIONS  TO administrator;
 
 CREATE TABLE collections_public.database (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
@@ -421,15 +425,25 @@ CREATE SCHEMA meta_private;
 
 GRANT USAGE ON SCHEMA meta_private TO authenticated;
 
+GRANT USAGE ON SCHEMA meta_private TO administrator;
+
 ALTER DEFAULT PRIVILEGES IN SCHEMA meta_private 
- GRANT SELECT ON TABLES  TO administrator;
+ GRANT ALL ON TABLES  TO administrator;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA meta_private 
+ GRANT EXECUTE ON FUNCTIONS  TO administrator;
 
 CREATE SCHEMA meta_public;
 
 GRANT USAGE ON SCHEMA meta_public TO authenticated;
 
+GRANT USAGE ON SCHEMA meta_public TO administrator;
+
 ALTER DEFAULT PRIVILEGES IN SCHEMA meta_public 
- GRANT SELECT ON TABLES  TO administrator;
+ GRANT ALL ON TABLES  TO administrator;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA meta_public 
+ GRANT EXECUTE ON FUNCTIONS  TO administrator;
 
 CREATE TABLE meta_public.apis (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
