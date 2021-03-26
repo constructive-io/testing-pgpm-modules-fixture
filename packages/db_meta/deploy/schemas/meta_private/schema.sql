@@ -6,6 +6,8 @@ BEGIN;
 CREATE SCHEMA meta_private;
 
 GRANT USAGE ON SCHEMA meta_private TO authenticated;
-ALTER DEFAULT PRIVILEGES IN SCHEMA meta_private GRANT SELECT ON TABLES TO administrator;
+GRANT USAGE ON SCHEMA meta_private TO administrator;
+ALTER DEFAULT PRIVILEGES IN SCHEMA meta_private GRANT ALL ON TABLES TO administrator;
+ALTER DEFAULT PRIVILEGES IN SCHEMA meta_private GRANT EXECUTE ON FUNCTIONS TO administrator;
 
 COMMIT;
