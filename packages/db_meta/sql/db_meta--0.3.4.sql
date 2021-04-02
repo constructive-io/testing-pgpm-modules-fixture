@@ -9,7 +9,10 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA collections_private
  GRANT ALL ON TABLES  TO administrator;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA collections_private 
- GRANT EXECUTE ON FUNCTIONS  TO administrator;
+ GRANT ALL ON SEQUENCES  TO administrator;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA collections_private 
+ GRANT ALL ON FUNCTIONS  TO administrator;
 
 CREATE SCHEMA collections_public;
 
@@ -21,7 +24,10 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA collections_public
  GRANT ALL ON TABLES  TO administrator;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA collections_public 
- GRANT EXECUTE ON FUNCTIONS  TO administrator;
+ GRANT ALL ON SEQUENCES  TO administrator;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA collections_public 
+ GRANT ALL ON FUNCTIONS  TO administrator;
 
 CREATE TABLE collections_public.database (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
@@ -431,7 +437,10 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA meta_private
  GRANT ALL ON TABLES  TO administrator;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA meta_private 
- GRANT EXECUTE ON FUNCTIONS  TO administrator;
+ GRANT ALL ON SEQUENCES  TO administrator;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA meta_private 
+ GRANT ALL ON FUNCTIONS  TO administrator;
 
 CREATE SCHEMA meta_public;
 
@@ -443,7 +452,10 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA meta_public
  GRANT ALL ON TABLES  TO administrator;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA meta_public 
- GRANT EXECUTE ON FUNCTIONS  TO administrator;
+ GRANT ALL ON SEQUENCES  TO administrator;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA meta_public 
+ GRANT ALL ON FUNCTIONS  TO administrator;
 
 CREATE TABLE meta_public.apis (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
