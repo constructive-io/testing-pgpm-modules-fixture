@@ -23,7 +23,6 @@ CREATE TABLE collections_public.limit_function (
   CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES collections_public.database (id) ON DELETE CASCADE,
   CONSTRAINT table_fkey FOREIGN KEY (table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
 
-  UNIQUE(function_template_name, database_id),
   UNIQUE (database_id, name)
 );
 
