@@ -33,6 +33,7 @@ CREATE TABLE meta_public.memberships_module (
     entity_table_owner_id uuid NULL,
 
     owned_field_ids uuid[] NULL,
+    
     data jsonb, -- can store payload which can then parse into other fields
     --
 
