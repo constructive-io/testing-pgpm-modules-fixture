@@ -14,6 +14,7 @@ CREATE TABLE collections_public.table (
 
   label text,
   description text,
+  
   smart_tags jsonb,
   
   is_system boolean DEFAULT FALSE, -- TODO DEPRECATE
