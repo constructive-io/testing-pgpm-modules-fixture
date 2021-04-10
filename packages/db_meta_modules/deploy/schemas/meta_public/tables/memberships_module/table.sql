@@ -26,9 +26,11 @@ CREATE TABLE meta_public.memberships_module (
     acl_table_id uuid NOT NULL DEFAULT uuid_nil(),
 
     membership_type int NOT NULL,
+    prefix text NOT NULL,
     -- if this is NOT NULL, then we add entity_id 
     -- e.g. memberships to the app itself are considered global owned by app and no explicit owner
     entity_table_id uuid NULL,
+    entity_table_owner_id uuid NULL,
     --
 
     actor_mask_check text NOT NULL DEFAULT '',
@@ -48,6 +50,7 @@ CREATE TABLE meta_public.memberships_module (
     CONSTRAINT acl_table_fkey FOREIGN KEY (acl_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
 
     CONSTRAINT entity_table_fkey FOREIGN KEY (entity_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
+    CONSTRAINT entity_table_owner_fkey FOREIGN KEY (entity_table_owner_id) REFERENCES collections_public.field (id) ON DELETE CASCADE,
     CONSTRAINT actor_table_fkey FOREIGN KEY (actor_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
     CONSTRAINT limits_table_fkey FOREIGN KEY (limits_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
     CONSTRAINT default_limits_table_fkey FOREIGN KEY (default_limits_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
