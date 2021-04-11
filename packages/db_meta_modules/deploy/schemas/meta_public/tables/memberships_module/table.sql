@@ -14,6 +14,9 @@ CREATE TABLE meta_public.memberships_module (
     members_table_id uuid NOT NULL DEFAULT uuid_nil(),
     members_table_name text NOT NULL DEFAULT 'memberships',
 
+    member_defaults_table_id uuid NOT NULL DEFAULT uuid_nil(),
+    member_defaults_table_name text NOT NULL DEFAULT 'membership_defaults',
+
     grants_table_id uuid NOT NULL DEFAULT uuid_nil(),
     grants_table_name text NOT NULL DEFAULT 'grants',
 
@@ -33,7 +36,7 @@ CREATE TABLE meta_public.memberships_module (
     entity_table_owner_id uuid NULL,
 
     owned_field_ids uuid[] NULL,
-    
+
     data jsonb, -- can store payload which can then parse into other fields
     --
 
@@ -50,6 +53,7 @@ CREATE TABLE meta_public.memberships_module (
     CONSTRAINT private_schema_fkey FOREIGN KEY (private_schema_id) REFERENCES collections_public.schema (id) ON DELETE CASCADE,
 
     CONSTRAINT members_table_fkey FOREIGN KEY (members_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
+    CONSTRAINT member_defaults_table_fkey FOREIGN KEY (member_defaults_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
     CONSTRAINT grants_table_fkey FOREIGN KEY (grants_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
     CONSTRAINT acl_table_fkey FOREIGN KEY (acl_table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
 
@@ -68,7 +72,16 @@ COMMENT ON CONSTRAINT private_schema_fkey ON meta_public.memberships_module IS E
 COMMENT ON CONSTRAINT db_fkey ON meta_public.memberships_module IS E'@omit manyToMany';
 CREATE INDEX memberships_module_database_id_idx ON meta_public.memberships_module ( database_id );
 
+COMMENT ON CONSTRAINT entity_table_fkey
+     ON meta_public.memberships_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT entity_table_owner_fkey
+     ON meta_public.memberships_module IS E'@omit manyToMany';
+
 COMMENT ON CONSTRAINT members_table_fkey
+     ON meta_public.memberships_module IS E'@omit manyToMany';
+
+COMMENT ON CONSTRAINT member_defaults_table_name
      ON meta_public.memberships_module IS E'@omit manyToMany';
 
 COMMENT ON CONSTRAINT grants_table_fkey
