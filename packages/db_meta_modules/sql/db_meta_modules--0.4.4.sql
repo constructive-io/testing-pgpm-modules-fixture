@@ -536,7 +536,7 @@ COMMENT ON CONSTRAINT encrypted_table_fkey ON meta_public.user_auth_module IS E'
 
 COMMENT ON CONSTRAINT tokens_table_fkey ON meta_public.user_auth_module IS E'@omit';
 
-CREATE TABLE meta_public.user_status_module (
+CREATE TABLE meta_public.levels_module (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
 	database_id uuid NOT NULL,
 	schema_id uuid NOT NULL DEFAULT ( uuid_nil() ),
@@ -574,21 +574,21 @@ CREATE TABLE meta_public.user_status_module (
 	CONSTRAINT actor_table_fkey FOREIGN KEY ( actor_table_id ) REFERENCES collections_public."table" ( id ) ON DELETE CASCADE 
 );
 
-COMMENT ON CONSTRAINT db_fkey ON meta_public.user_status_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT db_fkey ON meta_public.levels_module IS E'@omit manyToMany';
 
-COMMENT ON CONSTRAINT schema_fkey ON meta_public.user_status_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT schema_fkey ON meta_public.levels_module IS E'@omit manyToMany';
 
-COMMENT ON CONSTRAINT steps_table_fkey ON meta_public.user_status_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT steps_table_fkey ON meta_public.levels_module IS E'@omit manyToMany';
 
-COMMENT ON CONSTRAINT achievements_table_fkey ON meta_public.user_status_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT achievements_table_fkey ON meta_public.levels_module IS E'@omit manyToMany';
 
-COMMENT ON CONSTRAINT levels_table_fkey ON meta_public.user_status_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT levels_table_fkey ON meta_public.levels_module IS E'@omit manyToMany';
 
-COMMENT ON CONSTRAINT level_requirements_table_fkey ON meta_public.user_status_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT level_requirements_table_fkey ON meta_public.levels_module IS E'@omit manyToMany';
 
-COMMENT ON CONSTRAINT actor_table_fkey ON meta_public.user_status_module IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT actor_table_fkey ON meta_public.levels_module IS E'@omit manyToMany';
 
-CREATE INDEX user_status_module_database_id_idx ON meta_public.user_status_module ( database_id );
+CREATE INDEX user_status_module_database_id_idx ON meta_public.levels_module ( database_id );
 
 CREATE TABLE meta_public.users_module (
  	id uuid PRIMARY KEY DEFAULT ( uuid_generate_v4() ),
