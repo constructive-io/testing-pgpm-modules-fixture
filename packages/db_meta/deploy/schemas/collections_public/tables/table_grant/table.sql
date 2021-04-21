@@ -15,9 +15,7 @@ CREATE TABLE collections_public.table_grant (
     field_ids uuid[],
     --
     CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES collections_public.database (id) ON DELETE CASCADE,
-    CONSTRAINT table_fkey FOREIGN KEY (table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE,
-
-    unique(table_id, privilege, role_name)
+    CONSTRAINT table_fkey FOREIGN KEY (table_id) REFERENCES collections_public.table (id) ON DELETE CASCADE
 );
 
 COMMENT ON CONSTRAINT table_fkey ON collections_public.table_grant IS E'@omit manyToMany';
