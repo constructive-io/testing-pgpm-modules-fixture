@@ -1,4 +1,4 @@
--- Verify schemas/meta_public/tables/denormalized_fields_tables/table on pg
+-- Verify schemas/meta_public/tables/denormalized_table_field/table on pg
 
 BEGIN;
 

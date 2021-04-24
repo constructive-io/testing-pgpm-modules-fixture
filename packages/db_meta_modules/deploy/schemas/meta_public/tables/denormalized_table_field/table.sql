@@ -1,10 +1,10 @@
--- Deploy schemas/meta_public/tables/denormalized_fields_tables/table to pg
+-- Deploy schemas/meta_public/tables/denormalized_table_field/table to pg
 
 -- requires: schemas/meta_public/schema
 
 BEGIN;
 
-CREATE TABLE meta_public.denormalized_fields_tables (
+CREATE TABLE meta_public.denormalized_table_field (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4 (),
     database_id uuid NOT NULL,
 
@@ -27,10 +27,10 @@ CREATE TABLE meta_public.denormalized_fields_tables (
     CONSTRAINT field_fkey FOREIGN KEY (field_id) REFERENCES collections_public.field (id) ON DELETE CASCADE
 );
 
-COMMENT ON CONSTRAINT db_fkey ON meta_public.denormalized_fields_tables IS E'@omit manyToMany';
-COMMENT ON CONSTRAINT table_fkey ON meta_public.denormalized_fields_tables IS E'@omit manyToMany';
-COMMENT ON CONSTRAINT ref_table_fkey ON meta_public.denormalized_fields_tables IS E'@omit manyToMany';
-COMMENT ON CONSTRAINT field_fkey ON meta_public.denormalized_fields_tables IS E'@omit manyToMany';
-CREATE INDEX denormalized_fields_tables_database_id_idx ON meta_public.denormalized_fields_tables ( database_id );
+COMMENT ON CONSTRAINT db_fkey ON meta_public.denormalized_table_field IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT table_fkey ON meta_public.denormalized_table_field IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT ref_table_fkey ON meta_public.denormalized_table_field IS E'@omit manyToMany';
+COMMENT ON CONSTRAINT field_fkey ON meta_public.denormalized_table_field IS E'@omit manyToMany';
+CREATE INDEX denormalized_table_field_database_id_idx ON meta_public.denormalized_table_field ( database_id );
 
 COMMIT;
