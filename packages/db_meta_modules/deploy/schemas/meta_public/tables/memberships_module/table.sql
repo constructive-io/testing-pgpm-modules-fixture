@@ -31,6 +31,9 @@ CREATE TABLE meta_public.memberships_module (
     default_permissions_table_id uuid NOT NULL DEFAULT uuid_nil(),
     acl_table_id uuid NOT NULL DEFAULT uuid_nil(),
 
+    admin_grants_table_id uuid NOT NULL DEFAULT uuid_nil(),
+    admin_grants_table_name text NOT NULL DEFAULT '',
+
     membership_type int NOT NULL,
 
     -- if this is NOT NULL, then we add entity_id 
