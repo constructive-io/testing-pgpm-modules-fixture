@@ -15,6 +15,9 @@ CREATE TABLE meta_public.user_auth_module (
     encrypted_table_id uuid NOT NULL DEFAULT uuid_nil(),
     tokens_table_id uuid NOT NULL DEFAULT uuid_nil(),
 
+    audits_table_id uuid NOT NULL DEFAULT uuid_nil(),
+    audits_table_name text NOT NULL DEFAULT '',
+
     -- api_id uuid NOT NULL REFERENCES meta_public.apis (id),
 
     sign_in_function text NOT NULL DEFAULT 'login',
