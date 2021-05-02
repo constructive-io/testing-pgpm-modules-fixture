@@ -71,6 +71,8 @@ CREATE TABLE collections_public."table" (
 	smart_tags jsonb,
 	is_system boolean DEFAULT ( FALSE ),
 	use_rls boolean NOT NULL DEFAULT ( FALSE ),
+	timestamps boolean NOT NULL DEFAULT ( FALSE ),
+	peoplestamps boolean NOT NULL DEFAULT ( FALSE ),
 	plural_name text,
 	singular_name text,
 	CONSTRAINT db_fkey FOREIGN KEY ( database_id ) REFERENCES collections_public.database ( id ) ON DELETE CASCADE,

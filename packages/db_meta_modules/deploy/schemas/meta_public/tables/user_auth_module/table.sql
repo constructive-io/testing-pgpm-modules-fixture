@@ -29,6 +29,9 @@ CREATE TABLE meta_public.user_auth_module (
     send_verification_email_function text NOT NULL DEFAULT 'send_verification_email',
     verify_email_function text NOT NULL DEFAULT 'verify_email',
     
+    verify_password_function text NOT NULL DEFAULT 'verify_password',
+    check_password_function text NOT NULL DEFAULT 'check_password',
+
     send_account_deletion_email_function text NOT NULL DEFAULT 'send_account_deletion_email',
     delete_account_function text NOT NULL DEFAULT 'confirm_delete_account',
 
