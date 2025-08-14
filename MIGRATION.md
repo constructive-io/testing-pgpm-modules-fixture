@@ -9,6 +9,10 @@ This file will be updated as we move each package. Destination categories follow
 Progress
 - [x] @launchql/ext-verify -> packages/security/ext-verify
 - [x] @launchql/ext-types -> packages/data-types/ext-types
+- [x] @launchql/ext-default-roles -> packages/security/ext-default-roles
+- [x] @launchql/ext-jwt-claims -> packages/security/ext-jwt-claims
+- [x] @launchql/ext-jobs -> packages/jobs/ext-jobs
+
 - [x] @launchql/ext-uuid -> packages/data-types/ext-uuid
 
 Details
