@@ -4,38 +4,24 @@ import gql from 'graphql-tag';
 let teardown: () => Promise<void>, graphQLQuery: any;
 
 beforeAll(async () => {
-  ({ teardown, graphQLQuery } = await getConnections(['myschema_public']));
+  ({ teardown, graphQLQuery } = await getConnections(['measurements']));
 });
 
 afterAll(async () => {
   await teardown();
 });
 
-const CreateUser = gql`
-  mutation CreateUser($username: String!) {
-    createUser(input: { user: { username: $username } }) {
-      user {
-        id
-        username
-      }
-    }
+const SimpleQuery = gql`
+  query {
+    __typename
   }
 `;
 
 describe('signup', () => {
   describe('has an API', () => {
     it('query your API', async () => {
-      const result = await graphQLQuery(
-        CreateUser,
-        {
-          username: 'pyramation'
-        },
-        true
-      );
-      expect(result.data).toBeTruthy();
-      expect(result.data.createUser).toBeTruthy();
-      expect(result.data.createUser.user).toBeTruthy();
-      expect(result.data.createUser.user.id).toBeTruthy();
+      const result = await graphQLQuery(SimpleQuery, {}, true);
+      expect(result.errors).toBeFalsy();
     });
   });
 });

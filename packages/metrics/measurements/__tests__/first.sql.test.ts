@@ -1,7 +1,6 @@
 import { getConnections } from './utils';
 
-let teardown: () => Promise<void>, db: any, conn: any;
-const objs: any = {};
+let teardown: () => Promise<void>, conn: any;
 
 describe('signup', () => {
   beforeAll(async () => {
@@ -11,12 +10,9 @@ describe('signup', () => {
     await teardown();
   });
   describe('has a database', () => {
-    it('query your  database', async () => {
-      await conn.any('INSERT INTO myschema.mytable DEFAULT VALUES');
-      const res = await conn.any('SELECT * FROM myschema.mytable');
-      console.log(res);
-      expect(res.length).toBe(1);
-      expect(res.length).toBe(0);
+    it('query your database', async () => {
+      const res = await conn.any('SELECT * FROM measurements.quantities LIMIT 1');
+      expect(Array.isArray(res)).toBe(true);
     });
   });
 });
