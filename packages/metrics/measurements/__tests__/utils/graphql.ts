@@ -1,3 +1,4 @@
+
 import { getConnections as getC, getConnectionsApi as getA } from '@launchql/graphql-testing';
 
 export const getService = (schemas: string[]) => ({ dbname }: { dbname: string }) => ({
@@ -16,9 +17,9 @@ export const getService = (schemas: string[]) => ({ dbname }: { dbname: string }
 });
 
 export const getConnections = async (schemas: string[]) => {
-  return getC(schemas, getService(schemas));
+  return getC(schemas, getService(schemas), { plan: 'launchql.plan' });
 };
 
 export const getConnectionsApi = async ([pub, priv]: [string, string]) => {
-  return getA([pub, priv], getService([pub]));
+  return getA([pub, priv], getService([pub]), { plan: 'launchql.plan' });
 };
