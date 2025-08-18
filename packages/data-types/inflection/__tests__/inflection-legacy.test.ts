@@ -7,25 +7,16 @@ let teardown: any;
 
 describe('inflection', () => {
   beforeAll(async () => {
-    try {
-      ({ db, pg, teardown } = await getConnections());
-    } catch (e) {
-    }
+    ({ db, pg, teardown } = await getConnections());
   });
 
   afterAll(async () => {
-    try {
-      if (typeof teardown === 'function') {
-        await teardown();
-      }
-    } catch (e) {
-    }
+    await teardown();
   });
 
   cases(
     'slugify',
     async (opts: { name: string; allowUnicode: boolean; result: string }) => {
-      if (!pg || typeof pg.one !== 'function') { expect(true).toBe(true); return; }
       const { pg_slugify } = await pg.one(
         'SELECT * FROM inflection.pg_slugify($1, $2)',
         [opts.name, opts.allowUnicode]
@@ -49,7 +40,6 @@ describe('inflection', () => {
   cases(
     'underscore',
     async (opts: { name: string; result: string }) => {
-      if (!pg || typeof pg.one !== 'function') { expect(true).toBe(true); return; }
       const { underscore } = await pg.one(
         'SELECT * FROM inflection.underscore($1)',
         [opts.name]
@@ -71,7 +61,6 @@ describe('inflection', () => {
   cases(
     'no_single_underscores',
     async (opts: { name: string; result: string }) => {
-      if (!pg || typeof pg.one !== 'function') { expect(true).toBe(true); return; }
       const { no_single_underscores } = await pg.one(
         'SELECT * FROM inflection.no_single_underscores($1)',
         [opts.name]
@@ -84,7 +73,6 @@ describe('inflection', () => {
   cases(
     'pascal',
     async (opts: { name: string; result: string }) => {
-      if (!pg || typeof pg.one !== 'function') { expect(true).toBe(true); return; }
       const { pascal } = await pg.one(
         'SELECT * FROM inflection.pascal($1)',
         [opts.name]
@@ -109,7 +97,6 @@ describe('inflection', () => {
   cases(
     'camel',
     async (opts: { name: string; result: string }) => {
-      if (!pg || typeof pg.one !== 'function') { expect(true).toBe(true); return; }
       const { camel } = await pg.one(
         'SELECT * FROM inflection.camel($1)',
         [opts.name]
@@ -135,7 +122,6 @@ describe('inflection', () => {
   cases(
     'no_consecutive_caps',
     async (opts: { name: string; result: string }) => {
-      if (!pg || typeof pg.one !== 'function') { expect(true).toBe(true); return; }
       const { no_consecutive_caps } = await pg.one(
         'SELECT * FROM inflection.no_consecutive_caps($1)',
         [opts.name]
@@ -153,7 +139,6 @@ describe('inflection', () => {
   cases(
     'plural',
     async (opts: { name: string; result: string }) => {
-      if (!pg || typeof pg.one !== 'function') { expect(true).toBe(true); return; }
       const { plural } = await pg.one(
         'SELECT * FROM inflection.plural($1)',
         [opts.name]
@@ -175,7 +160,6 @@ describe('inflection', () => {
   cases(
     'singular',
     async (opts: { name: string; result: string }) => {
-      if (!pg || typeof pg.one !== 'function') { expect(true).toBe(true); return; }
       const { singular } = await pg.one(
         'SELECT * FROM inflection.singular($1)',
         [opts.name]

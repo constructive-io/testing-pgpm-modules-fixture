@@ -5,34 +5,21 @@ let pg: any;
 let teardown: any;
 
 beforeAll(async () => {
-  try {
-    ({ db, pg, teardown } = await getConnections());
-  } catch {
-  }
+  ({ db, pg, teardown } = await getConnections());
 });
 
 afterAll(async () => {
-  try {
-    if (typeof teardown === 'function') {
-      await teardown();
-    }
-  } catch {
-  }
+  await teardown();
 });
 
 beforeEach(() => {
-  if (db && typeof db.beforeEach === 'function') {
-    db.beforeEach();
-  }
+  db.beforeEach();
 });
 afterEach(() => {
-  if (db && typeof db.afterEach === 'function') {
-    db.afterEach();
-  }
+  db.afterEach();
 });
 
 it('more', async () => {
-  if (!db || typeof db.one !== 'function') { expect(true).toBe(true); return; }
   const { mask_pad } = await db.one(
     `SELECT utils.mask_pad($1, $2) AS mask_pad`,
     ['101', 20]
@@ -41,7 +28,6 @@ it('more', async () => {
 });
 
 it('less', async () => {
-  if (!db || typeof db.one !== 'function') { expect(true).toBe(true); return; }
   const { mask_pad } = await db.one(
     `SELECT utils.mask_pad($1, $2) AS mask_pad`,
     ['101', 2]
@@ -51,7 +37,6 @@ it('less', async () => {
 
 describe('bitmask', () => {
   it('more', async () => {
-    if (!db || typeof db.one !== 'function') { expect(true).toBe(true); return; }
     const { bitmask_pad } = await db.one(
       `SELECT utils.bitmask_pad($1::varbit, $2) AS bitmask_pad`,
       ['101', 20]
@@ -60,7 +45,6 @@ describe('bitmask', () => {
   });
 
   it('less', async () => {
-    if (!db || typeof db.one !== 'function') { expect(true).toBe(true); return; }
     const { bitmask_pad } = await db.one(
       `SELECT utils.bitmask_pad($1::varbit, $2) AS bitmask_pad`,
       ['101', 2]

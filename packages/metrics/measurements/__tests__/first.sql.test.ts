@@ -4,29 +4,19 @@ let teardown: (() => Promise<void>) | undefined, db: any;
 
 describe('signup', () => {
   beforeAll(async () => {
-    try {
-      ({ db, teardown } = await getConnections());
-    } catch (e) {
-    }
+    ({ db, teardown } = await getConnections());
   });
   beforeEach(async () => {
-    if (db && typeof db.beforeEach === 'function') {
-      await db.beforeEach();
-    }
+    await db.beforeEach();
   });
   afterEach(async () => {
-    if (db && typeof db.afterEach === 'function') {
-      await db.afterEach();
-    }
+    await db.afterEach();
   });
   afterAll(async () => {
-    if (typeof teardown === 'function') {
-      await teardown();
-    }
+    await teardown();
   });
   describe('has a database', () => {
     it('schema exists', async () => {
-      if (!db || typeof (db as any).any !== 'function') { expect(true).toBe(true); return; }
       const res = await db.any(
         "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'measurements'"
       );

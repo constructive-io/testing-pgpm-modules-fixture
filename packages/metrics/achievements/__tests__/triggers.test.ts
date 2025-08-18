@@ -22,87 +22,71 @@ const advanced = [
 ];
 
 beforeAll(async () => {
-  try {
-    ({ db, pg, teardown } = await getConnections());
-    if (pg && typeof pg.any === 'function') {
-      await pg.any(`CREATE TABLE status_public.mytable (
-        id serial,
-        name text,
-        toggle text,
-        is_approved boolean,
-        is_verified boolean default false
-      );`);
+  ({ db, pg, teardown } = await getConnections());
 
-      await pg.any(`CREATE TRIGGER mytable_tg1 
-        BEFORE INSERT ON status_public.mytable 
-        FOR EACH ROW
-        EXECUTE FUNCTION status_private.tg_achievement('name', 'tg_achievement');`);
+  await pg.any(`CREATE TABLE status_public.mytable (
+    id serial,
+    name text,
+    toggle text,
+    is_approved boolean,
+    is_verified boolean default false
+  );`);
 
-      await pg.any(`CREATE TRIGGER mytable_tg2
-        BEFORE UPDATE ON status_public.mytable 
-        FOR EACH ROW
-        WHEN (NEW.name IS DISTINCT FROM OLD.name)
-        EXECUTE FUNCTION status_private.tg_achievement('name', 'tg_achievement');`);
+  await pg.any(`CREATE TRIGGER mytable_tg1 
+    BEFORE INSERT ON status_public.mytable 
+    FOR EACH ROW
+    EXECUTE FUNCTION status_private.tg_achievement('name', 'tg_achievement');`);
 
-      await pg.any(`CREATE TRIGGER mytable_tg3
-        BEFORE INSERT ON status_public.mytable
-        FOR EACH ROW
-        EXECUTE FUNCTION status_private.tg_achievement_toggle('toggle', 'tg_achievement_toggle');`);
+  await pg.any(`CREATE TRIGGER mytable_tg2
+    BEFORE UPDATE ON status_public.mytable 
+    FOR EACH ROW
+    WHEN (NEW.name IS DISTINCT FROM OLD.name)
+    EXECUTE FUNCTION status_private.tg_achievement('name', 'tg_achievement');`);
 
-      await pg.any(`CREATE TRIGGER mytable_tg4
-        BEFORE UPDATE ON status_public.mytable
-        FOR EACH ROW
-        WHEN (NEW.toggle IS DISTINCT FROM OLD.toggle)
-        EXECUTE FUNCTION status_private.tg_achievement_toggle('toggle', 'tg_achievement_toggle');`);
+  await pg.any(`CREATE TRIGGER mytable_tg3
+    BEFORE INSERT ON status_public.mytable
+    FOR EACH ROW
+    EXECUTE FUNCTION status_private.tg_achievement_toggle('toggle', 'tg_achievement_toggle');`);
 
-      await pg.any(`CREATE TRIGGER mytable_tg5
-        BEFORE INSERT ON status_public.mytable
-        FOR EACH ROW
-        EXECUTE FUNCTION status_private.tg_achievement_boolean('is_approved', 'tg_achievement_boolean');`);
+  await pg.any(`CREATE TRIGGER mytable_tg4
+    BEFORE UPDATE ON status_public.mytable
+    FOR EACH ROW
+    WHEN (NEW.toggle IS DISTINCT FROM OLD.toggle)
+    EXECUTE FUNCTION status_private.tg_achievement_toggle('toggle', 'tg_achievement_toggle');`);
 
-      await pg.any(`CREATE TRIGGER mytable_tg6
-        BEFORE UPDATE ON status_public.mytable
-        FOR EACH ROW
-        WHEN (NEW.is_approved IS DISTINCT FROM OLD.is_approved)
-        EXECUTE FUNCTION status_private.tg_achievement_boolean('is_approved', 'tg_achievement_boolean');`);
+  await pg.any(`CREATE TRIGGER mytable_tg5
+    BEFORE INSERT ON status_public.mytable
+    FOR EACH ROW
+    EXECUTE FUNCTION status_private.tg_achievement_boolean('is_approved', 'tg_achievement_boolean');`);
 
-      await pg.any(`CREATE TRIGGER mytable_tg7
-        BEFORE INSERT ON status_public.mytable
-        FOR EACH ROW
-        EXECUTE FUNCTION status_private.tg_achievement_toggle_boolean('is_verified', 'tg_achievement_toggle_boolean');`);
+  await pg.any(`CREATE TRIGGER mytable_tg6
+    BEFORE UPDATE ON status_public.mytable
+    FOR EACH ROW
+    WHEN (NEW.is_approved IS DISTINCT FROM OLD.is_approved)
+    EXECUTE FUNCTION status_private.tg_achievement_boolean('is_approved', 'tg_achievement_boolean');`);
 
-      await pg.any(`CREATE TRIGGER mytable_tg8
-        BEFORE UPDATE ON status_public.mytable
-        FOR EACH ROW
-        WHEN (NEW.is_verified IS DISTINCT FROM OLD.is_verified)
-        EXECUTE FUNCTION status_private.tg_achievement_toggle_boolean('is_verified', 'tg_achievement_toggle_boolean');`);
-    }
+  await pg.any(`CREATE TRIGGER mytable_tg7
+    BEFORE INSERT ON status_public.mytable
+    FOR EACH ROW
+    EXECUTE FUNCTION status_private.tg_achievement_toggle_boolean('is_verified', 'tg_achievement_toggle_boolean');`);
 
-    if (pg && typeof pg.setContext === 'function') {
-      await pg.setContext({
-        'jwt.claims.user_id': user_id
-      });
-    }
-  } catch (e) {
-  }
+  await pg.any(`CREATE TRIGGER mytable_tg8
+    BEFORE UPDATE ON status_public.mytable
+    FOR EACH ROW
+    WHEN (NEW.is_verified IS DISTINCT FROM OLD.is_verified)
+    EXECUTE FUNCTION status_private.tg_achievement_toggle_boolean('is_verified', 'tg_achievement_toggle_boolean');`);
+
+  await pg.setContext({
+    'jwt.claims.user_id': user_id
+  });
 });
 
 afterAll(async () => {
-  try {
-    if (typeof teardown === 'function') {
-      await teardown();
-    }
-  } catch (e) {
-  }
+  await teardown();
 });
 
 beforeEach(async () => {
-  if (!pg) return;
-  if (typeof pg.beforeEach === 'function') {
-    await pg.beforeEach();
-  }
-
-  if (typeof pg.any !== 'function') return;
+  await pg.beforeEach();
 
   for (const name of levels) {
     await pg.any(
@@ -128,13 +112,10 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  if (pg && typeof pg.afterEach === 'function') {
-    await pg.afterEach();
-  }
+  await pg.afterEach();
 });
 
 it('newbie', async () => {
-  if (!pg || typeof pg.any !== 'function') { expect(true).toBe(true); return; }
   const beforeInsert = await pg.any(
     `SELECT * FROM status_public.user_achievements ORDER BY name`
   );
