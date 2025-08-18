@@ -180,7 +180,7 @@ docker run --name launchql-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=pos
 ## Local DB-backed testing and per-package Jest
 
  - Each package has its own jest.config.js with roots: ['<rootDir>/__tests__'] so running pnpm test inside a package only runs that package's tests.
-- Tests use @launchql/db-testing to provision a fresh database per test run using createdb -T testing-template-db.
+- Tests use pgsql-test to provision a fresh database per test run (and graphile-test for GraphQL helpers).
 - Ensure each SQL-backed package contains:
   - launchql.plan (and a mirrored sqitch.plan where applicable), deploy/, verify/, revert/, and any required *.control files.
   - These assets are included in dist by each package’s build/copy steps.
