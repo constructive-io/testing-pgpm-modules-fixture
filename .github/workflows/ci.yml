@@ -1,96 +1,91 @@
-name: CI
-
+name: LaunchQL tests
 on:
   push:
-    branches: [ main, refactor/**, feature/** ]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
-  build-and-test:
+  container-job:
     runs-on: ubuntu-latest
+    container: pyramation/node-sqitch:20.12.0
+
+    env:
+      PGHOST: pg_db
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: password
 
     services:
-      postgres:
-        image: postgis/postgis:15-3.4
-        ports:
-          - 5432:5432
+      pg_db:
+        image: pyramation/pgvector:13.3-alpine
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: testdb
+          POSTGRES_PASSWORD: password
         options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      minio_cdn:
+        image: minio/minio:edge-cicd
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        ports:
+          - 9000:9000
+          - 9001:9001
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Configure Git (for tests)
+        run: |
+          git config --global user.name "CI Test User"
+          git config --global user.email "ci@example.com"
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
+      - name: Enable corepack and pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9 --activate
+          pnpm -v
+          node -v
 
-      - name: Install dependencies
+      - name: Install
         run: pnpm install
-
-      - name: Wait for Postgres
-        run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
-            echo "Waiting for Postgres..."
-            sleep 2
-          done
-
-      - name: Prepare database (extensions/schemas)
-        env:
-          PGPASSWORD: postgres
-        run: |
-          psql -h localhost -U postgres -d testdb -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-          psql -h localhost -U postgres -d testdb -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
-          psql -h localhost -U postgres -d testdb -c "CREATE EXTENSION IF NOT EXISTS citext;"
-          psql -h localhost -U postgres -d testdb -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
-          psql -h localhost -U postgres -d testdb -c "CREATE EXTENSION IF NOT EXISTS hstore;"
-          psql -h localhost -U postgres -d testdb -c "CREATE SCHEMA IF NOT EXISTS myschema;"
-          psql -h localhost -U postgres -d testdb -c "CREATE SCHEMA IF NOT EXISTS myschema_public;"
-          psql -h localhost -U postgres -d testdb -c "CREATE SCHEMA IF NOT EXISTS meta_public;"
-          psql -h localhost -U postgres -d testdb -c "CREATE SCHEMA IF NOT EXISTS meta_private;"
-          psql -h localhost -U postgres -d testdb -c "CREATE SCHEMA IF NOT EXISTS collections_public;"
-          psql -h localhost -U postgres -d testdb -c "CREATE SCHEMA IF NOT EXISTS collections_private;"
-          psql -h localhost -U postgres -d testdb -c "CREATE SCHEMA IF NOT EXISTS app_jobs;"
-          psql -h localhost -U postgres -d testdb -v ON_ERROR_STOP=1 -c "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anonymous') THEN CREATE ROLE anonymous; END IF; END $$;"
-          psql -h localhost -U postgres -d testdb -c "ALTER ROLE anonymous WITH NOCREATEDB NOSUPERUSER NOCREATEROLE NOLOGIN NOREPLICATION NOBYPASSRLS;"
-          psql -h localhost -U postgres -d testdb -v ON_ERROR_STOP=1 -c "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated; END IF; END $$;"
-          psql -h localhost -U postgres -d testdb -c "ALTER ROLE authenticated WITH NOCREATEDB NOSUPERUSER NOCREATEROLE NOLOGIN NOREPLICATION NOBYPASSRLS;"
-          psql -h localhost -U postgres -d testdb -v ON_ERROR_STOP=1 -c "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'administrator') THEN CREATE ROLE administrator; END IF; END $$;"
-          psql -h localhost -U postgres -d testdb -c "ALTER ROLE administrator WITH NOCREATEDB NOSUPERUSER NOCREATEROLE NOLOGIN NOREPLICATION BYPASSRLS;"
-      - name: Prepare testing template database
-        env:
-          PGPASSWORD: postgres
-        run: |
-          if ! psql -h localhost -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'testing-template-db'" | grep -q 1; then
-            createdb -U postgres -h localhost -e testing-template-db -T template0
-          fi
-          psql -h localhost -U postgres -d testing-template-db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-          psql -h localhost -U postgres -d testing-template-db -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
-          psql -h localhost -U postgres -d testing-template-db -c "CREATE EXTENSION IF NOT EXISTS citext;"
-          psql -h localhost -U postgres -d testing-template-db -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
-          psql -h localhost -U postgres -d testing-template-db -c "CREATE EXTENSION IF NOT EXISTS hstore;"
-
 
       - name: Build
         run: pnpm -r build
 
-      - name: Test
+      - name: Fix lql permissions (if present)
+        run: |
+          if [ -f node_modules/.bin/lql ]; then chmod +x node_modules/.bin/lql; else echo "lql not installed, skipping chmod"; fi
+
+      - name: Seed app_user (if lql present)
+        run: |
+          if [ -f node_modules/.bin/lql ]; then
+            pnpm lql admin-users bootstrap --yes
+            pnpm lql admin-users add --test --yes
+          else
+            echo "lql not installed, skipping seed"
+          fi
         env:
-          PGHOST: localhost
+          PGHOST: pg_db
           PGPORT: 5432
           PGUSER: postgres
-          PGPASSWORD: postgres
-          PGDATABASE: testdb
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/testdb
+          PGPASSWORD: password
+
+      - name: Test (workspace)
         run: pnpm -r test
+        env:
+          PGHOST: pg_db
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: password
