@@ -4,7 +4,7 @@ import gql from 'graphql-tag';
 let teardown: () => Promise<void>, graphQLQuery: any;
 
 beforeAll(async () => {
-  ({ teardown, graphQLQuery } = await getConnections(['measurements']));
+  ({ teardown, query: graphQLQuery } = await getConnections(['measurements']));
 });
 
 afterAll(async () => {
