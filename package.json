@@ -32,11 +32,7 @@
   "scripts": {
     "clean": "pnpm -r clean",
     "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "migrate:sql": "bash scripts/migrate-sql-assets.sh",
-    "db:start": "bash scripts/dev-db.sh",
-    "db:stop": "docker stop launchql-pg || true && docker rm launchql-pg || true",
-    "test:db": "PGHOST=localhost PGPORT=5432 PGUSER=postgres PGPASSWORD=postgres PGDATABASE=testdb DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb pnpm -r test"
+    "lint": "pnpm -r lint"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
