@@ -1,4 +1,5 @@
-import { getConnections, PgTestClient } from 'pgsql-test';
+import { getConnections } from 'pgsql-test';
+import type { PgTestClient } from 'pgsql-test';
 
 let db: PgTestClient;
 let pg: PgTestClient;
