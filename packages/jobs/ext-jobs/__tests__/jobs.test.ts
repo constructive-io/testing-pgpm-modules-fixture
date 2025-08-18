@@ -8,36 +8,26 @@ const objs: Record<string, any> = {};
 
 describe('scheduled jobs', () => {
   beforeAll(async () => {
-    try {
-      ({ db, pg, teardown } = await getConnections());
-      const [{ u }] = await db.any('select current_user as u');
-      await pg.any(`grant usage on schema app_jobs to "${u}"`);
-      await pg.any(`grant all privileges on all tables in schema app_jobs to "${u}"`);
-      await pg.any(`grant usage, select on all sequences in schema app_jobs to "${u}"`);
-    } catch (e) {
-    }
+    ({ db, pg, teardown } = await getConnections());
+    const [{ u }] = await db.any('select current_user as u');
+    await pg.any(`grant usage on schema app_jobs to "${u}"`);
+    await pg.any(`grant all privileges on all tables in schema app_jobs to "${u}"`);
+    await pg.any(`grant usage, select on all sequences in schema app_jobs to "${u}"`);
   });
 
   beforeEach(async () => {
-    if (db && typeof db.beforeEach === 'function') {
-      await db.beforeEach();
-    }
+    await db.beforeEach();
   });
 
   afterEach(async () => {
-    if (db && typeof db.afterEach === 'function') {
-      await db.afterEach();
-    }
+    await db.afterEach();
   });
 
   afterAll(async () => {
-    if (typeof teardown === 'function') {
-      await teardown();
-    }
+    await teardown();
   });
 
   it('schedule jobs by cron', async () => {
-    if (!db || (typeof (db as any).one !== 'function' && typeof (db as any).any !== 'function')) { expect(true).toBe(true); return; }
     const result = await db.one(
       `INSERT INTO app_jobs.scheduled_jobs (task_identifier, schedule_info)
        VALUES ($1, $2)
@@ -55,7 +45,6 @@ describe('scheduled jobs', () => {
   });
 
   it('schedule jobs by rule', async () => {
-    if (!db || (typeof (db as any).one !== 'function' && typeof (db as any).any !== 'function')) { expect(true).toBe(true); return; }
     const start = new Date(Date.now() + 10000);
     const end = new Date(start.getTime() + 180000);
 
@@ -73,7 +62,6 @@ describe('scheduled jobs', () => {
   });
 
   it('schedule jobs', async () => {
-    if (!db || (typeof (db as any).one !== 'function' && typeof (db as any).any !== 'function')) { expect(true).toBe(true); return; }
     const [result] = await db.any(
       `SELECT * FROM app_jobs.run_scheduled_job($1)`,
       [objs.scheduled2.id]
@@ -84,7 +72,6 @@ describe('scheduled jobs', () => {
   });
 
   it('schedule jobs with keys', async () => {
-    if (!db || (typeof (db as any).one !== 'function' && typeof (db as any).any !== 'function')) { expect(true).toBe(true); return; }
     const start = new Date(Date.now() + 10000);
     const end = new Date(start.getTime() + 180000);
 

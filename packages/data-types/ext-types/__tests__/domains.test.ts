@@ -58,23 +58,13 @@ let db: any;
 let pg: any;
 
 beforeAll(async () => {
-  try {
-    ({ db, pg, teardown } = await getConnections());
-    if (db && pg) {
-      const res = await db.any('select current_user as u');
-      const [{ u }] = Array.isArray(res) ? res : [];
-      if (u) {
-        await pg.any(`grant usage, create on schema public to "${u}"`);
-      }
-    }
-  } catch (e) {
-  }
+  ({ db, pg, teardown } = await getConnections());
+  const [{ u }] = await db.any('select current_user as u');
+  await pg.any(`grant usage, create on schema public to "${u}"`);
 });
 
 beforeAll(async () => {
-  try {
-    if (db && typeof (db as any).any === 'function') {
-      await db.any(`
+  await db.any(`
 CREATE TABLE customers (
   id serial,
   url url,
@@ -83,36 +73,23 @@ CREATE TABLE customers (
   domain hostname,
   email email
 );
-      `);
-    }
-  } catch (e) {
-  }
+  `);
 });
 
 beforeEach(async () => {
-  if (db && typeof db.beforeEach === 'function') {
-    await db.beforeEach();
-  }
+  await db.beforeEach();
 });
 
 afterEach(async () => {
-  if (db && typeof db.afterEach === 'function') {
-    await db.afterEach();
-  }
+  await db.afterEach();
 });
 
 afterAll(async () => {
-  try {
-    if (typeof teardown === 'function') {
-      await teardown();
-    }
-  } catch (e) {
-  }
+  await teardown();
 });
 
 describe('types', () => {
   it('valid attachment and image', async () => {
-    if (!db || typeof (db as any).any !== 'function') { expect(true).toBe(true); return; }
     for (const value of validAttachments) {
       await db.any(`INSERT INTO customers (image) VALUES ($1::json);`, [value]);
       await db.any(`INSERT INTO customers (attachment) VALUES ($1::json);`, [value]);
@@ -120,7 +97,6 @@ describe('types', () => {
   });
 
   it('invalid attachment and image', async () => {
-    if (!db || typeof (db as any).any !== 'function') { expect(true).toBe(true); return; }
     for (const value of invalidAttachments) {
       let failed = false;
       try {
@@ -140,14 +116,12 @@ describe('types', () => {
   });
 
   it('valid url', async () => {
-    if (!db || typeof (db as any).any !== 'function') { expect(true).toBe(true); return; }
     for (const value of validUrls) {
       await db.any(`INSERT INTO customers (url) VALUES ($1);`, [value]);
     }
   });
 
   it('invalid url', async () => {
-    if (!db || typeof (db as any).any !== 'function') { expect(true).toBe(true); return; }
     for (const value of invalidUrls) {
       let failed = false;
       try {
@@ -160,7 +134,6 @@ describe('types', () => {
   });
 
   it('email', async () => {
-    if (!db || typeof (db as any).any !== 'function') { expect(true).toBe(true); return; }
     await db.any(`
     INSERT INTO customers (email) VALUES
     ('d@google.com'),
@@ -172,7 +145,6 @@ describe('types', () => {
   });
 
   it('not email', async () => {
-    if (!db || typeof (db as any).any !== 'function') { expect(true).toBe(true); return; }
     let failed = false;
     try {
       await db.any(`
@@ -185,7 +157,6 @@ describe('types', () => {
   });
 
   it('hostname', async () => {
-    if (!db || typeof (db as any).any !== 'function') { expect(true).toBe(true); return; }
     await db.any(`
     INSERT INTO customers (domain) VALUES
     ('google.com'),
@@ -197,7 +168,6 @@ describe('types', () => {
   });
 
   it('not hostname', async () => {
-    if (!db || typeof (db as any).any !== 'function') { expect(true).toBe(true); return; }
     let failed = false;
     try {
       await db.any(`
@@ -210,7 +180,6 @@ describe('types', () => {
   });
 
   it('not hostname 2', async () => {
-    if (!db || typeof (db as any).any !== 'function') { expect(true).toBe(true); return; }
     let failed = false;
     try {
       await db.any(`

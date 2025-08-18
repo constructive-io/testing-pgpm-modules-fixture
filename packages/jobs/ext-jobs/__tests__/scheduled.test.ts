@@ -36,7 +36,6 @@ describe('scheduled jobs', () => {
   });
 
   it('schedule jobs by cron', async () => {
-    if (!app) { expect(true).toBe(true); return; }
     objs.scheduled1 = await app.insertOne(
       'scheduled_jobs',
       {
@@ -54,7 +53,6 @@ describe('scheduled jobs', () => {
   });
 
   it('schedule jobs by rule', async () => {
-    if (!app) { expect(true).toBe(true); return; }
     const start = new Date(Date.now() + 10000);
     const end = new Date(start.getTime() + 180000);
     objs.scheduled2 = await app.insertOne(
@@ -77,7 +75,6 @@ describe('scheduled jobs', () => {
   });
 
   it('schedule jobs', async () => {
-    if (!app) { expect(true).toBe(true); return; }
     const [result] = await app.callAny('run_scheduled_job', {
       id: objs.scheduled2.id
     });
@@ -86,7 +83,6 @@ describe('scheduled jobs', () => {
   });
 
   it('schedule jobs with keys', async () => {
-    if (!app) { expect(true).toBe(true); return; }
     const start = new Date(Date.now() + 10000);
     const end = new Date(start.getTime() + 180000);
 
