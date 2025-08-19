@@ -1,13 +1,12 @@
 import { getConnections, PgTestClient } from 'pgsql-test';
 
-let db: PgTestClient;
 let pg: PgTestClient;
 let teardown:  () => Promise<void>;
 
 beforeAll(async () => {
-  ({ db, pg, teardown } = await getConnections());
+  ({ pg, teardown } = await getConnections());
 
-  await db.any(`
+  await pg.any(`
     CREATE TABLE public.test_stamps (
       id serial PRIMARY KEY,
       name text,
@@ -37,13 +36,13 @@ afterAll(async () => {
   }
 });
 
-beforeEach(() => db.beforeEach());
-afterEach(() => db.afterEach());
+beforeEach(() => pg.beforeEach());
+afterEach(() => pg.afterEach());
 
 it('applies timestamps and peoplestamps', async () => {
-  await db.setContext({ 'jwt.claims.user_id': '00000000-0000-0000-0000-000000000001' });
+  await pg.setContext({ 'jwt.claims.user_id': '00000000-0000-0000-0000-000000000001' });
 
-  const insertRes = await db.one(
+  const insertRes = await pg.one(
     `INSERT INTO public.test_stamps (name) VALUES ($1) RETURNING *`,
     ['Alice']
   );

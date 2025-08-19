@@ -13,12 +13,13 @@ afterAll(async () => {
   await teardown();
 });
 
-beforeEach(() => {
-  pg.beforeEach();
-});
-afterEach(() => {
-  pg.afterEach();
-});
+// we're not writing to the db, so we don't need to beforeEach/afterEach
+// beforeEach(() => {
+//   pg.beforeEach();
+// });
+// afterEach(() => {
+//   pg.afterEach();
+// });
 
 it('base32_to_decimal', async () => {
     const { base32_to_decimal } = await pg.one(

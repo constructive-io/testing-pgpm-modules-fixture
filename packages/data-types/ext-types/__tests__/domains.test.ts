@@ -53,18 +53,15 @@ const invalidAttachments = [
   { url: 'https://foo.bar/some.png' }
 ];
 
-let teardown: (() => Promise<void>) | undefined;
-let db: any;
-let pg: any;
+let pg: PgTestClient;
+let teardown:  () => Promise<void>;
 
 beforeAll(async () => {
-  ({ db, pg, teardown } = await getConnections());
-  const [{ u }] = await db.any('select current_user as u');
-  await pg.any(`grant usage, create on schema public to "${u}"`);
+  ({ pg, teardown } = await getConnections());
 });
 
 beforeAll(async () => {
-  await db.any(`
+  await pg.any(`
 CREATE TABLE customers (
   id serial,
   url url,
@@ -77,11 +74,11 @@ CREATE TABLE customers (
 });
 
 beforeEach(async () => {
-  await db.beforeEach();
+  await pg.beforeEach();
 });
 
 afterEach(async () => {
-  await db.afterEach();
+  await pg.afterEach();
 });
 
 afterAll(async () => {
@@ -91,8 +88,8 @@ afterAll(async () => {
 describe('types', () => {
   it('valid attachment and image', async () => {
     for (const value of validAttachments) {
-      await db.any(`INSERT INTO customers (image) VALUES ($1::json);`, [value]);
-      await db.any(`INSERT INTO customers (attachment) VALUES ($1::json);`, [value]);
+      await pg.any(`INSERT INTO customers (image) VALUES ($1::json);`, [value]);
+      await pg.any(`INSERT INTO customers (attachment) VALUES ($1::json);`, [value]);
     }
   });
 
@@ -100,14 +97,14 @@ describe('types', () => {
     for (const value of invalidAttachments) {
       let failed = false;
       try {
-        await db.any(`INSERT INTO customers (attachment) VALUES ($1);`, [value]);
+        await pg.any(`INSERT INTO customers (attachment) VALUES ($1);`, [value]);
       } catch (e) {
         failed = true;
       }
       expect(failed).toBe(true);
       failed = false;
       try {
-        await db.any(`INSERT INTO customers (image) VALUES ($1);`, [value]);
+        await pg.any(`INSERT INTO customers (image) VALUES ($1);`, [value]);
       } catch (e) {
         failed = true;
       }
@@ -117,7 +114,7 @@ describe('types', () => {
 
   it('valid url', async () => {
     for (const value of validUrls) {
-      await db.any(`INSERT INTO customers (url) VALUES ($1);`, [value]);
+      await pg.any(`INSERT INTO customers (url) VALUES ($1);`, [value]);
     }
   });
 
@@ -125,7 +122,7 @@ describe('types', () => {
     for (const value of invalidUrls) {
       let failed = false;
       try {
-        await db.any(`INSERT INTO customers (url) VALUES ($1);`, [value]);
+        await pg.any(`INSERT INTO customers (url) VALUES ($1);`, [value]);
       } catch (e) {
         failed = true;
       }
@@ -134,7 +131,7 @@ describe('types', () => {
   });
 
   it('email', async () => {
-    await db.any(`
+    await pg.any(`
     INSERT INTO customers (email) VALUES
     ('d@google.com'),
     ('d@google.in'),
@@ -147,7 +144,7 @@ describe('types', () => {
   it('not email', async () => {
     let failed = false;
     try {
-      await db.any(`
+      await pg.any(`
       INSERT INTO customers (email) VALUES
       ('http://google.some.other.com')`);
     } catch (e) {
@@ -157,7 +154,7 @@ describe('types', () => {
   });
 
   it('hostname', async () => {
-    await db.any(`
+    await pg.any(`
     INSERT INTO customers (domain) VALUES
     ('google.com'),
     ('google.in'),
@@ -170,7 +167,7 @@ describe('types', () => {
   it('not hostname', async () => {
     let failed = false;
     try {
-      await db.any(`
+      await pg.any(`
       INSERT INTO customers (domain) VALUES
       ('http://google.some.other.com')`);
     } catch (e) {
@@ -182,7 +179,7 @@ describe('types', () => {
   it('not hostname 2', async () => {
     let failed = false;
     try {
-      await db.any(`
+      await pg.any(`
       INSERT INTO customers (domain) VALUES
       ('google.some.other.com/a/b/d')`);
     } catch (e) {

@@ -13,12 +13,13 @@ afterAll(async () => {
   await teardown();
 });
 
-beforeEach(() => {
-  pg.beforeEach();
-});
-afterEach(() => {
-  pg.afterEach();
-});
+// we're not writing to the db, so we don't need to beforeEach/afterEach
+// beforeEach(() => {
+//   pg.beforeEach();
+// });
+// afterEach(() => {
+//   pg.afterEach();
+// });
 
 it('to_ascii', async () => {
   const { to_ascii } = await pg.one(

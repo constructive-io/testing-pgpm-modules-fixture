@@ -1,11 +1,10 @@
 import { getConnections, PgTestClient } from 'pgsql-test';
 
-let db: PgTestClient;
 let pg: PgTestClient;
-let teardown:  () => Promise<void>;
+let teardown: () => Promise<void>;
 
 beforeAll(async () => {
-  ({ db, pg, teardown } = await getConnections());
+  ({ pg, teardown } = await getConnections());
 
   await pg.any(`
     CREATE TABLE public.items (
@@ -33,15 +32,15 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await teardown();
+  try {
+    await teardown();
+  } catch (e) {
+    console.error('Teardown failed:', e);
+  }
 });
 
-beforeEach(async () => {
-  await pg.beforeEach();
-});
-afterEach(async () => {
-  await pg.afterEach();
-});
+beforeEach(() => pg.beforeEach());
+afterEach(() => pg.afterEach());
 
 describe('uuids.pseudo_order_uuid()', () => {
   it('generates a valid UUID', async () => {
