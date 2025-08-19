@@ -1,224 +1,230 @@
-import { getConnections } from './utils';
-import { snap } from './utils/snaps';
+import { getConnections, PgTestClient } from 'pgsql-test';
+import { snapshot } from 'graphile-test';
 
-let db: any, meta: any, collections: any, teardown: () => Promise<void>, database_id: string;
-const objs: Record<string, any> = {
-  tables: {},
-  domains: {},
-  apis: {},
-  sites: {}
-};
+let pg: PgTestClient;
+let teardown: () => Promise<void>;
 
-const owner_id = '07281002-1699-4762-57e3-ab1b92243120';
+describe('db_meta functionality', () => {
+  beforeAll(async () => {
+    ({ pg, teardown } = await getConnections());
+  });
 
-beforeAll(async () => {
-  ({ db, teardown } = await getConnections());
-  await db.begin();
-  await db.savepoint('db');
-  await db.any(`GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public to public;`);
-  meta = {
-    public: db.helper('meta_public'),
-    private: db.helper('meta_private')
-  };
-  collections = {
-    public: db.helper('collections_public'),
-    private: db.helper('collections_private')
-  };
-});
-
-afterAll(async () => {
-  try {
-    await db.rollback('db');
-    await db.commit();
+  afterAll(async () => {
     await teardown();
-  } catch (e) {
-    console.log(e);
-  }
-});
-
-beforeEach(async () => {
-  db.setContext({
-    role: 'postgres'
-  });
-});
-
-const createDatabase = async () => {
-  const obj = await collections.public.insertOne('database', {
-    owner_id,
-    name: 'my-meta-db'
-  });
-  objs.db = obj;
-  database_id = obj.id;
-  snap(obj);
-};
-
-const registerDomain = async ({ domain, subdomain }: { domain?: string; subdomain: string }) => {
-  const obj = await meta.public.insertOne('domains', {
-    database_id,
-    domain,
-    subdomain
-  });
-  objs.domains[subdomain] = obj;
-  snap(obj);
-};
-
-it('create database', async () => {
-  await createDatabase();
-});
-
-it('register domain', async () => {
-  await registerDomain({ subdomain: 'api', domain: 'lql.io' });
-  await registerDomain({ subdomain: 'app', domain: 'lql.io' });
-  await registerDomain({ subdomain: 'admin', domain: 'lql.io' });
-  const obj = await meta.public.insertOne('domains', {
-    database_id,
-    domain: 'lql.io'
-  });
-  objs.domains.base = obj;
-});
-
-const registerApi = async ({ domain, name, schemas, anon_role, role_name }: { domain: any; name: string; schemas: string[]; anon_role: string; role_name: string }) => {
-  const obj = await meta.public.insertOne(
-    'apis',
-    {
-      database_id,
-      domain_id: domain.id,
-      schemas,
-      name,
-      anon_role,
-      role_name
-    },
-    {
-      schemas: 'text[]'
-    }
-  );
-  objs.apis[domain.subdomain] = obj;
-
-  obj.dbname = 'my-database';
-  snap(obj);
-};
-
-it('register apis', async () => {
-  await registerApi({
-    domain: objs.domains.api,
-    name: 'public',
-    schemas: ['a'],
-    anon_role: 'anonymous',
-    role_name: 'authenticated'
-  });
-  await registerApi({
-    domain: objs.domains.admin,
-    name: 'admin',
-    schemas: ['b', 'soon link this with a fkey'],
-    anon_role: 'administrator',
-    role_name: 'administrator'
-  });
-});
-
-const registerSite = async ({ domain, title, description }: { domain: any; title: string; description: string }) => {
-  const obj = await meta.public.insertOne('sites', {
-    database_id,
-    domain_id: domain.id,
-    title,
-    description
-  });
-  objs.sites[domain.subdomain] = obj;
-
-  obj.dbname = 'my-database';
-  snap(obj);
-};
-
-const registerSiteModule = async ({ site, name, data }: { site: any; name: string; data: any }) => {
-  const obj = await meta.public.insertOne(
-    'site_modules',
-    {
-      database_id,
-      site_id: site.id,
-      name,
-      data: JSON.stringify(data)
-    },
-    {
-      data: 'jsonb'
-    }
-  );
-  snap(obj);
-};
-
-const registerApiModule = async ({ apiObj, name, data }: { apiObj: any; name: string; data: any }) => {
-  const obj = await meta.public.insertOne(
-    'api_modules',
-    {
-      database_id,
-      api_id: apiObj.id,
-      name,
-      data: JSON.stringify(data)
-    },
-    {
-      data: 'jsonb'
-    }
-  );
-  snap(obj);
-};
-
-it('register sites', async () => {
-  await registerSite({
-    domain: objs.domains.app,
-    title: 'Website Title',
-    description: 'Website Description'
-  });
-});
-
-it('register modules', async () => {
-  registerSiteModule({
-    site: objs.sites.app,
-    name: 'legal-emails',
-    data: {
-      supportEmail: 'support@launchql.com'
-    }
   });
 
-  registerApiModule({
-    apiObj: objs.apis.api,
-    name: 'rls_module',
-    data: {
-      authenticate_schema: 'meta_private',
-      authenticate: 'authenticate'
-    }
+  beforeEach(async () => {
+    await pg.beforeEach();
+    // Grant execute permissions for functions
+    await pg.any(`GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO public`);
   });
 
-  registerSiteModule({
-    site: objs.sites.app,
-    name: 'user_auth_module',
-    data: {
-      auth_schema: 'meta_public',
-      sign_in: 'login',
-      sign_up: 'register',
-      set_password: 'set_password',
-      reset_password: 'reset_password',
-      forgot_password: 'forgot_password',
-      send_verification_email: 'send_verification_email',
-      verify_email: 'verify_email'
-    }
-  });
-});
-
-it('goes like this', async () => {
-  const schema = await collections.public.insertOne('schema', {
-    database_id,
-    schema_name: 'brand-public',
-    name: 'public'
+  afterEach(async () => {
+    await pg.afterEach();
   });
 
-  const publicAssoc = await meta.public.insertOne('api_schemata', {
-    database_id,
-    schema_id: schema.id,
-    api_id: objs.apis.api.id
+  it('should handle complete meta workflow', async () => {
+    const objs: Record<string, any> = {
+      tables: {},
+      domains: {},
+      apis: {},
+      sites: {}
+    };
+
+    const owner_id = '07281002-1699-4762-57e3-ab1b92243120';
+
+    // Helper function for snapshots
+    const snap = (obj: any) => {
+      expect(snapshot(obj)).toMatchSnapshot();
+    };
+
+    // Helper function for snapshots with dbname normalization
+    const snapWithNormalizedDbname = (obj: any) => {
+      const normalized = {
+        ...obj,
+        dbname: 'test-database' // Replace dynamic dbname with static value
+      };
+      expect(snapshot(normalized)).toMatchSnapshot();
+    };
+
+    // Step 1: Create database
+    const [database] = await pg.any(
+      `INSERT INTO collections_public.database (owner_id, name) 
+       VALUES ($1, $2) 
+       RETURNING *`,
+      [owner_id, 'my-meta-db']
+    );
+    objs.db = database;
+    const database_id = database.id;
+    expect(snapshot(database)).toMatchSnapshot();
+
+    // Step 2: Create APIs first (since domains reference them)
+    const [publicApi] = await pg.any(
+      `INSERT INTO meta_public.apis (database_id, name, role_name, anon_role) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING *`,
+      [database_id, 'public', 'authenticated', 'anonymous']
+    );
+    objs.apis.public = publicApi;
+    snapWithNormalizedDbname(publicApi);
+
+    const [adminApi] = await pg.any(
+      `INSERT INTO meta_public.apis (database_id, name, role_name, anon_role) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING *`,
+      [database_id, 'admin', 'administrator', 'administrator']
+    );
+    objs.apis.admin = adminApi;
+    snapWithNormalizedDbname(adminApi);
+
+    // Step 3: Create sites
+    const [appSite] = await pg.any(
+      `INSERT INTO meta_public.sites (database_id, title, description) 
+       VALUES ($1, $2, $3) 
+       RETURNING *`,
+      [database_id, 'Website Title', 'Website Description']
+    );
+    objs.sites.app = appSite;
+    snapWithNormalizedDbname(appSite);
+
+    // Step 4: Register domains (linking to APIs and sites)
+    const [apiDomain] = await pg.any(
+      `INSERT INTO meta_public.domains (database_id, api_id, domain, subdomain) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING *`,
+      [database_id, objs.apis.public.id, 'lql.io', 'api']
+    );
+    objs.domains.api = apiDomain;
+    expect(snapshot(apiDomain)).toMatchSnapshot();
+
+    const [appDomain] = await pg.any(
+      `INSERT INTO meta_public.domains (database_id, site_id, domain, subdomain) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING *`,
+      [database_id, objs.sites.app.id, 'lql.io', 'app']
+    );
+    objs.domains.app = appDomain;
+    expect(snapshot(appDomain)).toMatchSnapshot();
+
+    const [adminDomain] = await pg.any(
+      `INSERT INTO meta_public.domains (database_id, api_id, domain, subdomain) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING *`,
+      [database_id, objs.apis.admin.id, 'lql.io', 'admin']
+    );
+    objs.domains.admin = adminDomain;
+    expect(snapshot(adminDomain)).toMatchSnapshot();
+
+    const [baseDomain] = await pg.any(
+      `INSERT INTO meta_public.domains (database_id, domain) 
+       VALUES ($1, $2) 
+       RETURNING *`,
+      [database_id, 'lql.io']
+    );
+    objs.domains.base = baseDomain;
+
+    // Step 5: Register modules
+    const [siteModule1] = await pg.any(
+      `INSERT INTO meta_public.site_modules (database_id, site_id, name, data) 
+       VALUES ($1, $2, $3, $4::jsonb) 
+       RETURNING *`,
+      [database_id, objs.sites.app.id, 'legal-emails', JSON.stringify({
+        supportEmail: 'support@launchql.com'
+      })]
+    );
+    expect(snapshot(siteModule1)).toMatchSnapshot();
+
+    const [apiModule] = await pg.any(
+      `INSERT INTO meta_public.api_modules (database_id, api_id, name, data) 
+       VALUES ($1, $2, $3, $4::jsonb) 
+       RETURNING *`,
+      [database_id, objs.apis.public.id, 'rls_module', JSON.stringify({
+        authenticate_schema: 'meta_private',
+        authenticate: 'authenticate'
+      })]
+    );
+    expect(snapshot(apiModule)).toMatchSnapshot();
+
+    const [siteModule2] = await pg.any(
+      `INSERT INTO meta_public.site_modules (database_id, site_id, name, data) 
+       VALUES ($1, $2, $3, $4::jsonb) 
+       RETURNING *`,
+      [database_id, objs.sites.app.id, 'user_auth_module', JSON.stringify({
+        auth_schema: 'meta_public',
+        sign_in: 'login',
+        sign_up: 'register',
+        set_password: 'set_password',
+        reset_password: 'reset_password',
+        forgot_password: 'forgot_password',
+        send_verification_email: 'send_verification_email',
+        verify_email: 'verify_email'
+      })]
+    );
+    expect(snapshot(siteModule2)).toMatchSnapshot();
+
+    // Step 6: Schema associations
+    const [schema] = await pg.any(
+      `INSERT INTO collections_public.schema (database_id, schema_name, name) 
+       VALUES ($1, $2, $3) 
+       RETURNING *`,
+      [database_id, 'brand-public', 'public']
+    );
+
+    const [publicAssoc] = await pg.any(
+      `INSERT INTO meta_public.api_schemata (database_id, schema_id, api_id) 
+       VALUES ($1, $2, $3) 
+       RETURNING *`,
+      [database_id, schema.id, objs.apis.public.id]
+    );
+    
+    const [adminAssoc] = await pg.any(
+      `INSERT INTO meta_public.api_schemata (database_id, schema_id, api_id) 
+       VALUES ($1, $2, $3) 
+       RETURNING *`,
+      [database_id, schema.id, objs.apis.admin.id]
+    );
+    
+    snap(publicAssoc);
+    snap(adminAssoc);
   });
-  const adminAssoc = await meta.public.insertOne('api_schemata', {
-    database_id,
-    schema_id: schema.id,
-    api_id: objs.apis.admin.id
+
+  // Individual component tests
+  it('should create database independently', async () => {
+    const owner_id = '07281002-1699-4762-57e3-ab1b92243120';
+    
+    const [database] = await pg.any(
+      `INSERT INTO collections_public.database (owner_id, name) 
+       VALUES ($1, $2) 
+       RETURNING *`,
+      [owner_id, 'test-db']
+    );
+    
+    expect(database.owner_id).toBe(owner_id);
+    expect(database.name).toBe('test-db');
+    expect(database.id).toBeDefined();
   });
-  snap(publicAssoc);
-  snap(adminAssoc);
+
+  it('should register domain independently', async () => {
+    const owner_id = '07281002-1699-4762-57e3-ab1b92243120';
+    
+    // Create database first
+    const [database] = await pg.any(
+      `INSERT INTO collections_public.database (owner_id, name) 
+       VALUES ($1, $2) 
+       RETURNING *`,
+      [owner_id, 'test-db-for-domain']
+    );
+    
+    // Then create domain
+    const [domain] = await pg.any(
+      `INSERT INTO meta_public.domains (database_id, domain, subdomain) 
+       VALUES ($1, $2, $3) 
+       RETURNING *`,
+      [database.id, 'example.com', 'api']
+    );
+    
+    expect(domain.database_id).toBe(database.id);
+    expect(domain.domain).toBe('example.com');
+    expect(domain.subdomain).toBe('api');
+  });
 });

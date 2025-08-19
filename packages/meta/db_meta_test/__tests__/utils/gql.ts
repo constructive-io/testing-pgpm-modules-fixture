@@ -27,7 +27,6 @@ export const ApiQuery = gql`
             authenticate
             currentRole
             currentRoleId
-            currentGroupIds
           }
           # for now keep this for patches
           apiModules {
