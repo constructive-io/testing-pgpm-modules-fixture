@@ -1,7 +1,6 @@
 import { getConnections, PgTestClient } from 'pgsql-test';
 import { snapshot } from 'graphile-test';
 
-let db: PgTestClient;
 let pg: PgTestClient;
 let teardown:  () => Promise<void>;
 
@@ -22,7 +21,7 @@ const advanced = [
 ];
 
 beforeAll(async () => {
-  ({ db, pg, teardown } = await getConnections());
+  ({ pg, teardown } = await getConnections());
 
   await pg.any(`CREATE TABLE status_public.mytable (
     id serial,
