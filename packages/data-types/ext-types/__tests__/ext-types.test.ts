@@ -1,10 +1,10 @@
 import { getConnections, PgTestClient } from 'pgsql-test';
 
 let teardown: () => Promise<void>;
-let db: any;
+let pg: PgTestClient;
 
 beforeAll(async () => {
-  ({ db, teardown } = await getConnections());
+  ({ pg, teardown } = await getConnections());
 });
 
 afterAll(async () => {
@@ -13,7 +13,7 @@ afterAll(async () => {
 
 describe('@launchql/ext-types', () => {
   it('creates domain types', async () => {
-    const { typname } = await db.one(
+    const { typname } = await pg.one(
       `SELECT typname FROM pg_type WHERE typname = 'url'`
     );
     expect(typname).toBe('url');
