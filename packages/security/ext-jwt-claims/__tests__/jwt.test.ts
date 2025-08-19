@@ -21,8 +21,8 @@ afterAll(async () => {
 });
 
 it('get values', async () => {
-  await db.any(`BEGIN`);
-  await db.any(
+  await pg.any(`BEGIN`);
+  await pg.any(
     `SELECT 
       set_config('jwt.claims.user_agent', $1, true),
       set_config('jwt.claims.ip_address', $2, true),
@@ -39,22 +39,22 @@ it('get values', async () => {
     ]
   );
 
-  const { user_agent } = await db.one(
+  const { user_agent } = await pg.one(
     `select jwt_public.current_user_agent() as user_agent`
   );
-  const { ip_address } = await db.one(
+  const { ip_address } = await pg.one(
     `select jwt_public.current_ip_address() as ip_address`
   );
-  const { database_id } = await db.one(
+  const { database_id } = await pg.one(
     `select jwt_private.current_database_id() as database_id`
   );
-  const { group_ids } = await db.one(
+  const { group_ids } = await pg.one(
     `select jwt_public.current_group_ids() as group_ids`
   );
-  const { user_id } = await db.one(
+  const { user_id } = await pg.one(
     `select jwt_public.current_user_id() as user_id`
   );
-  await db.any(`ROLLBACK`);
+  await pg.any(`ROLLBACK`);
 
   expect({ user_agent }).toMatchSnapshot();
   expect({ ip_address }).toMatchSnapshot();
