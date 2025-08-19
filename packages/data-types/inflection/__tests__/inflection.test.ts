@@ -15,7 +15,7 @@ describe('inflection', () => {
 
   cases(
     'slugify',
-    async (opts: { name: string; result: string }) => {
+    async (opts: { name: string; allowUnicode: boolean; result: string }) => {
       const { pg_slugify } = await pg.one(
         'SELECT * FROM inflection.pg_slugify($1, $2)',
         [opts.name, opts.allowUnicode]
