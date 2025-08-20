@@ -1,0 +1,3 @@
+# @pgql/inflection
+
+Inflection functions.

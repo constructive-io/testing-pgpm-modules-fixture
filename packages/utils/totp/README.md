@@ -1,3 +1,0 @@
-# @launchql/totp
-
-TOTP helpers.

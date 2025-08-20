@@ -1,3 +1,0 @@
-# @launchql/inflection
-
-Inflection functions.
