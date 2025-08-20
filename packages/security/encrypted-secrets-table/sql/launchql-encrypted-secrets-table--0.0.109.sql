@@ -1,4 +1,4 @@
-\echo Use "CREATE EXTENSION launchql-ext-encrypted-secrets-table" to load this file. \quit
+\echo Use "CREATE EXTENSION launchql-encrypted-secrets-table" to load this file. \quit
 CREATE SCHEMA secrets_schema;
 
 CREATE TABLE secrets_schema.secrets_table (

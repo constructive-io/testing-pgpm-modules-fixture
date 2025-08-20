@@ -1,4 +1,4 @@
--- Revert launchql-ext-defaults:defaults/public from pg
+-- Revert launchql-defaults:defaults/public from pg
 
 BEGIN;
 

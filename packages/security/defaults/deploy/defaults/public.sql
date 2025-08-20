@@ -1,4 +1,4 @@
--- Deploy launchql-ext-defaults:defaults/public to pg
+-- Deploy launchql-defaults:defaults/public to pg
 
 BEGIN;
 DO $$

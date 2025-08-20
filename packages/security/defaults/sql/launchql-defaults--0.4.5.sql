@@ -1,4 +1,4 @@
-\echo Use "CREATE EXTENSION launchql-ext-defaults" to load this file. \quit
+\echo Use "CREATE EXTENSION launchql-defaults" to load this file. \quit
 DO $$
   DECLARE
   sql text;

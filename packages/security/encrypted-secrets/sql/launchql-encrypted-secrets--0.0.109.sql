@@ -1,4 +1,4 @@
-\echo Use "CREATE EXTENSION launchql-ext-encrypted-secrets" to load this file. \quit
+\echo Use "CREATE EXTENSION launchql-encrypted-secrets" to load this file. \quit
 CREATE SCHEMA encrypted_secrets;
 
 CREATE FUNCTION encrypted_secrets.encrypt_field_bytea_to_text ( secret_value bytea ) RETURNS text AS $EOFCODE$

@@ -1,4 +1,4 @@
-\echo Use "CREATE EXTENSION launchql-ext-measurements" to load this file. \quit
+\echo Use "CREATE EXTENSION launchql-measurements" to load this file. \quit
 CREATE SCHEMA measurements;
 
 CREATE TABLE measurements.quantities (
