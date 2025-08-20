@@ -5,18 +5,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "sql/**",
-    "schemas/**",
-    "deploy/**",
-    "verify/**",
-    "revert/**",
-    "*.control",
-    "*.plan",
-    "README.md",
-    "LICENSE",
-    "src/**"
-  ],
   "scripts": {
     "test": "jest --config ./jest.config.js",
     "test:watch": "jest --config ./jest.config.js --watch"
