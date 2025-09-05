@@ -64,8 +64,8 @@ test_package() {
         return 1
     }
     
-    cd "$SCRIPT_DIR/$package_path" || {
-        echo -e "${RED}FAILED: Could not change to directory $SCRIPT_DIR/$package_path${NC}"
+    cd "$PROJECT_ROOT/$package_path" || {
+        echo -e "${RED}FAILED: Could not change to directory $PROJECT_ROOT/$package_path${NC}"
         cleanup_db "$dbname"
         return 1
     }
@@ -127,7 +127,8 @@ main() {
     fi
     
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    cd "$SCRIPT_DIR"
+    PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+    cd "$PROJECT_ROOT"
     
     echo "Finding all LaunchQL packages..."
     local packages=()
