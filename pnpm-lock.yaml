@@ -82,8 +82,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/data-types/stamps:
     dependencies:
@@ -95,8 +95,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/data-types/types:
     dependencies:
@@ -105,8 +105,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/data-types/uuid:
     dependencies:
@@ -115,8 +115,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/jobs/database-jobs:
     dependencies:
@@ -128,8 +128,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/jobs/jobs:
     dependencies:
@@ -141,8 +141,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/meta/db_meta:
     dependencies:
@@ -160,8 +160,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/meta/db_meta_modules:
     dependencies:
@@ -173,8 +173,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/meta/db_meta_test:
     dependencies:
@@ -189,8 +189,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/metrics/achievements:
     dependencies:
@@ -202,8 +202,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/metrics/measurements:
     dependencies:
@@ -212,8 +212,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/security/default-roles:
     dependencies:
@@ -222,8 +222,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/security/defaults:
     dependencies:
@@ -232,8 +232,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/security/encrypted-secrets:
     dependencies:
@@ -248,8 +248,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/security/encrypted-secrets-table:
     dependencies:
@@ -258,8 +258,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/security/jwt-claims:
     dependencies:
@@ -271,8 +271,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/security/totp:
     dependencies:
@@ -284,8 +284,8 @@ importers:
         version: link:../../utils/verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/utils/base32:
     dependencies:
@@ -294,8 +294,8 @@ importers:
         version: link:../verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/utils/faker:
     dependencies:
@@ -307,8 +307,8 @@ importers:
         version: link:../verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/utils/inflection:
     dependencies:
@@ -317,8 +317,8 @@ importers:
         version: link:../verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/utils/utils:
     dependencies:
@@ -327,14 +327,14 @@ importers:
         version: link:../verify
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
   packages/utils/verify:
     devDependencies:
       '@launchql/cli':
-        specifier: ^4.8.0
-        version: 4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
+        specifier: ^4.9.0
+        version: 4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
 
 packages:
 
@@ -864,8 +864,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@launchql/cli@4.8.0':
-    resolution: {integrity: sha512-ZtNJJnGAEBU3QCjPe67KsAxbpft1McC0q5QcnaVeWNJAMqHoCBno2R2lz3fr7fGtf74K1HPqerolnfrY4hqtmA==}
+  '@launchql/cli@4.9.0':
+    resolution: {integrity: sha512-KzDWSF4K1rKrVYaq21K+wZg5Jd/tMQaf7RV4o8DiSS1GX7dd2ZYgdgN/dsBxmfx2Whh9smqm8HbHJXLXmwE1rQ==}
     hasBin: true
 
   '@launchql/content-type-stream@2.3.0':
@@ -873,6 +873,11 @@ packages:
 
   '@launchql/core@2.8.0':
     resolution: {integrity: sha512-Jh1S+vShxUcQm1tV981b8R7/Ytlkp09SfGzRLpuPGJs8dDtv326uh2OBWFdMSWRKQDYrBpF3Wg7zKn71kwIn4Q==}
+    peerDependencies:
+      '@pgsql/types': ^17.6.1
+
+  '@launchql/core@2.9.0':
+    resolution: {integrity: sha512-qjIqALEZErNpSFzo0eLVHClYZbNfSn+fnBt/kdohd8Gvn7paYuDg+Y/IMTlljuQ8xJtyj1ZMXklE/lYNrq0C1w==}
     peerDependencies:
       '@pgsql/types': ^17.6.1
 
@@ -5926,9 +5931,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@launchql/cli@4.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))':
+  '@launchql/cli@4.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))':
     dependencies:
-      '@launchql/core': 2.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphql@15.5.2)
+      '@launchql/core': 2.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphql@15.5.2)
       '@launchql/env': 2.2.1(graphql@15.5.2)
       '@launchql/explorer': 2.3.1(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
       '@launchql/server': 2.3.2(graphile-build-pg@4.14.1(graphql@15.5.2)(pg@8.16.3))(graphql@15.5.2)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.5.2)(pg@8.16.3))
@@ -5962,6 +5967,31 @@ snapshots:
       uuid-hash: 2.2.0
 
   '@launchql/core@2.8.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphql@15.5.2)':
+    dependencies:
+      '@launchql/env': 2.2.1(graphql@15.5.2)
+      '@launchql/server-utils': 2.2.1(graphql@15.5.2)
+      '@launchql/templatizer': 2.3.0
+      '@launchql/types': 2.3.0(graphql@15.5.2)
+      '@pgsql/types': 17.6.1
+      case: 1.6.3
+      chalk: 4.1.2
+      csv-to-pg: 2.0.10(@babel/core@7.28.0)
+      glob: 11.0.3
+      parse-package-name: 1.0.0
+      pg-cache: 1.1.1(graphql@15.5.2)
+      pg-env: 1.1.0
+      pgsql-deparser: 17.11.1
+      pgsql-parser: 17.8.2
+      rimraf: 6.0.1
+    transitivePeerDependencies:
+      - '@babel/core'
+      - bufferutil
+      - graphql
+      - pg-native
+      - supports-color
+      - utf-8-validate
+
+  '@launchql/core@2.9.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphql@15.5.2)':
     dependencies:
       '@launchql/env': 2.2.1(graphql@15.5.2)
       '@launchql/server-utils': 2.2.1(graphql@15.5.2)
@@ -9805,7 +9835,7 @@ snapshots:
   ora@5.3.0:
     dependencies:
       bl: 4.1.0
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       is-interactive: 1.0.0
