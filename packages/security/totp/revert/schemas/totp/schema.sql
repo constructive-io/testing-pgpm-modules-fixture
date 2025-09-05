@@ -2,6 +2,6 @@
 
 BEGIN;
 
-DROP SCHEMA totp;
+DROP SCHEMA totp CASCADE;
 
 COMMIT;

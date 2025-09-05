@@ -2,6 +2,7 @@
 
 BEGIN;
 
+DROP FUNCTION totp.generate_secret;
 DROP FUNCTION totp.random_base32;
 
 COMMIT;
