@@ -2,6 +2,6 @@
 
 BEGIN;
 
--- XXX Add DDLs here.
+DROP FUNCTION list_indexes(text, text);
 
 COMMIT;
