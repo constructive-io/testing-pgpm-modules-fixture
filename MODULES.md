@@ -21,10 +21,10 @@
 ## Data Types
 
 ### Core Types
-- [ ] `packages/data-types/types` - Core data types
-- [ ] `packages/data-types/uuid` - UUID utilities
-- [ ] `packages/data-types/stamps` - Timestamp utilities
-- [ ] `packages/data-types/geotypes` - Geographic data types
+- [ ] `packages/data-types/types` - Core data types (ISSUE: domain verification failures - attachment, email, hostname, image, multiple_select, single_select, upload, url domains fail verification)
+- [x] `packages/data-types/uuid` - UUID utilities
+- [ ] `packages/data-types/stamps` - Timestamp utilities (ISSUE: verification failed for schemas/stamps/procedures/utils)
+- [ ] `packages/data-types/geotypes` - Geographic data types (ISSUE: dependency on types package which has verification failures)
 
 ## Jobs & Background Processing
 
@@ -54,11 +54,11 @@
 ## Utilities
 
 ### Core Utilities
-- [ ] `packages/utils/utils` - General utility functions
-- [ ] `packages/utils/verify` - Verification utilities (used by other modules)
-- [ ] `packages/utils/inflection` - String inflection utilities
-- [ ] `packages/utils/base32` - Base32 encoding/decoding
-- [ ] `packages/utils/faker` - Fake data generation
+- [ ] `packages/utils/utils` - General utility functions (ISSUE: revert failed - cannot drop schema utils because other objects depend on it, needs CASCADE or proper dependency handling)
+- [x] `packages/utils/verify` - Verification utilities (used by other modules)
+- [ ] `packages/utils/inflection` - String inflection utilities (ISSUE: revert failed - function name "inflection.slugify" is not unique, needs function signature in DROP statement)
+- [x] `packages/utils/base32` - Base32 encoding/decoding
+- [ ] `packages/utils/faker` - Fake data generation (ISSUE: verification failed for schemas/faker/tables/dictionary/table and schemas/faker/procedures/utils)
 
 ## Metrics & Analytics
 
@@ -69,9 +69,34 @@
 ---
 
 
+## Test Results Summary
+
+**Last Updated:** September 11, 2025
+**Test Environment:** Docker PostgreSQL 13
+**LaunchQL CLI Version:** 4.9.0
+
+**Passing Modules (3/22):** verify, base32, uuid
+**Failing Modules (5/22 tested):** inflection, utils, faker, types, stamps
+**Untested Modules (14/22):** Remaining modules not tested due to likely dependencies on failing foundational packages
+
+### Common Issues Found
+
+1. **Revert Script Issues:**
+   - Function name conflicts requiring explicit signatures in DROP statements (inflection)
+   - Schema dependency issues requiring CASCADE or proper ordering (utils)
+
+2. **Verification Failures:**
+   - Domain verification failures in types package affecting dependent packages
+   - Table and procedure verification failures (faker, stamps)
+
+3. **Dependency Chain Problems:**
+   - Many packages depend on the types package which has verification failures
+   - The verify package works correctly and is properly used as a dependency
+
 ## Notes
 
 - The `packages/utils/verify` module provides essential verification utilities that should be used in other modules' verify scripts
 - All modules should follow the same deploy/revert/verify pattern
 - Control files must declare dependencies properly
 - Each SQL file should be properly tested and reversible
+- Individual package testing reveals issues not caught by batch testing due to dependency order problems
