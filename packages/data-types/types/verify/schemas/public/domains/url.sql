@@ -2,6 +2,6 @@
 
 BEGIN;
 
-SELECT verify_type ('public.url');
+SELECT verify_domain ('public.url');
 
 ROLLBACK;

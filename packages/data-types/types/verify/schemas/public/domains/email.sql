@@ -2,6 +2,6 @@
 
 BEGIN;
 
-SELECT verify_type ('public.email');
+SELECT verify_domain ('public.email');
 
 ROLLBACK;

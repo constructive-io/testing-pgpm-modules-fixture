@@ -2,6 +2,6 @@
 
 BEGIN;
 
-SELECT verify_type ('public.image');
+SELECT verify_domain ('public.image');
 
 ROLLBACK;

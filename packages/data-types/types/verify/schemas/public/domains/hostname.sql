@@ -2,6 +2,6 @@
 
 BEGIN;
 
-SELECT verify_type ('public.hostname');
+SELECT verify_domain ('public.hostname');
 
 ROLLBACK;

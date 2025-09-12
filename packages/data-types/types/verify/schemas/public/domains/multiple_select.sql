@@ -2,6 +2,6 @@
 
 BEGIN;
 
-SELECT verify_type ('public.multiple_select');
+SELECT verify_domain ('public.multiple_select');
 
 ROLLBACK;
