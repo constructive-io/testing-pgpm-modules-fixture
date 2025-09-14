@@ -2,6 +2,7 @@
 
 BEGIN;
 
-SELECT verify_function ('stamps.utils');
+SELECT verify_function ('stamps.peoplestamps');
+SELECT verify_function ('stamps.timestamps');
 
 ROLLBACK;

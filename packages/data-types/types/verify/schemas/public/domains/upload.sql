@@ -2,6 +2,6 @@
 
 BEGIN;
 
-SELECT verify_type ('public.upload');
+SELECT verify_domain ('public.upload');
 
 ROLLBACK;

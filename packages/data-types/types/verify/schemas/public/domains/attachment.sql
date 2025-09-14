@@ -2,6 +2,6 @@
 
 BEGIN;
 
-SELECT verify_type ('public.attachment');
+SELECT verify_domain ('public.attachment');
 
 ROLLBACK;
