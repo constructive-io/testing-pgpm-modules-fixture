@@ -1,6 +1,6 @@
 {
   "name": "@lql-pg/measurements",
-  "version": "0.4.6",
+  "version": "0.3.0",
   "description": "Measurement utilities for performance tracking and analytics",
   "publishConfig": {
     "access": "public"

@@ -1,6 +1,6 @@
 {
   "name": "@lql-pg/jwt-claims",
-  "version": "0.4.6",
+  "version": "0.3.0",
   "description": "JWT claim handling and validation functions",
   "publishConfig": {
     "access": "public"

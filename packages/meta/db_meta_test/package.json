@@ -1,6 +1,6 @@
 {
   "name": "@lql-pg/meta-db-test",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Testing utilities for database metadata operations",
   "publishConfig": {
     "access": "public"
@@ -11,8 +11,8 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@lql-pg/meta-db-modules": "workspace:*",
     "@lql-pg/meta-db": "workspace:*",
+    "@lql-pg/meta-db-modules": "workspace:*",
     "@lql-pg/verify": "workspace:*"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@lql-pg/meta-db",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Database metadata utilities and introspection functions",
   "publishConfig": {
     "access": "public"
@@ -11,8 +11,8 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@lql-pg/inflection": "workspace:*",
     "@lql-pg/database-jobs": "workspace:*",
+    "@lql-pg/inflection": "workspace:*",
     "@lql-pg/types": "workspace:*",
     "@lql-pg/verify": "workspace:*"
   },
