@@ -1,10 +1,20 @@
-# pgpm Extensions
+# pgpm modules
 
-PostgreSQL extensions using the pgpm workflow for safe, testable, reversible SQL changes.
+PostgreSQL modules using the `pgpm` workflow for safe, testable, reversible SQL changes.
 
 ## Overview
 
-pgpm extends the Sqitch model to a multi-package npm workspace. Each package contains SQL changes organized as deploy/verify/revert triplets, enabling safe database migrations with proper rollback capabilities.
+**pgpm** is a modern CLI for modular PostgreSQL development—a focused command-line tool for PostgreSQL database migrations and package management. It provides the core functionality for managing database schemas, migrations, and module dependencies.
+
+This repository contains a curated collection of PostgreSQL modules built using the `pgpm` workflow. Each module follows the Sqitch-inspired deploy/verify/revert pattern, extending it to a multi-package npm workspace where SQL changes are organized as triplets, enabling safe database migrations with proper rollback capabilities.
+
+### Key Features
+
+- 📦 **Postgres Module System** — Reusable, composable database packages with dependency management, per-module plans, and versioned releases
+- 🔄 **Deterministic Migration Engine** — Version-controlled, plan-driven deployments with rollback support and idempotent execution enforced by dependency and validation safeguards
+- 📊 **Recursive Module Resolution** — Recursively resolves database package dependencies (just like npm) from plan files or SQL headers, producing a reproducible cross-module migration graph
+- 🏷️ **Tag-Aware Versioning** — Deploy to @tags, resolve tags to changes, and reference tags across modules for coordinated releases
+- 🐘 **Portable Postgres Development** — Rely on standard SQL migrations for a workflow that runs anywhere Postgres does
 
 ## Installation
 
