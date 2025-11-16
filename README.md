@@ -1,10 +1,10 @@
-# LaunchQL Extensions
+# pgpm Extensions
 
-PostgreSQL extensions using the LaunchQL/Sqitch-style workflow for safe, testable, reversible SQL changes.
+PostgreSQL extensions using the pgpm workflow for safe, testable, reversible SQL changes.
 
 ## Overview
 
-LaunchQL extends the Sqitch model to a multi-package npm workspace. Each package contains SQL changes organized as deploy/verify/revert triplets, enabling safe database migrations with proper rollback capabilities.
+pgpm extends the Sqitch model to a multi-package npm workspace. Each package contains SQL changes organized as deploy/verify/revert triplets, enabling safe database migrations with proper rollback capabilities.
 
 ## Installation
 
@@ -12,8 +12,8 @@ LaunchQL extends the Sqitch model to a multi-package npm workspace. Each package
 # Install dependencies
 pnpm install
 
-# Install LaunchQL CLI globally
-npm install -g @launchql/cli
+# Install pgpm CLI globally
+npm install -g pgpm
 ```
 
 ## Package Structure
@@ -52,7 +52,7 @@ npm install -g @launchql/cli
 - `@pgpm/measurements` - Performance tracking and analytics
 - `@pgpm/achievements` - Achievement system for user progress
 
-## LaunchQL Workflow
+## pgpm Workflow
 
 Each package follows the deploy/verify/revert pattern:
 
@@ -64,16 +64,16 @@ Each package follows the deploy/verify/revert pattern:
 
 ```bash
 # Deploy changes
-lql deploy
+pgpm deploy
 
 # Verify deployment
-lql verify
+pgpm verify
 
 # Revert changes
-lql revert
+pgpm revert
 
 # Package a module
-lql package
+pgpm package
 ```
 
 ## Development
@@ -98,11 +98,8 @@ pnpm eslint .
 ## Publishing
 
 ```bash
-# Version packages
-lerna version
-
 # Publish to npm
-lerna publish from-package
+pnpm lerna publish
 ```
 
 ## Dependencies
@@ -116,4 +113,4 @@ Packages use workspace protocol for internal dependencies:
 }
 ```
 
-For more details on the LaunchQL workflow, see [AGENTS.md](./AGENTS.md).
+For more details on the pgpm workflow, see [AGENTS.md](./AGENTS.md).
