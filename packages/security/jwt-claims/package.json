@@ -2,6 +2,10 @@
   "name": "@pgpm/jwt-claims",
   "version": "0.7.1",
   "description": "JWT claim handling and validation functions",
+  "author": "Dan Lynch <pyramation@gmail.com>",
+  "contributors": [
+    "Interweb <developers@interweb.co>"
+  ],
   "keywords": [
     "postgresql",
     "pgpm",

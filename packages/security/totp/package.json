@@ -2,6 +2,10 @@
   "name": "@pgpm/totp",
   "version": "0.7.1",
   "description": "Time-based One-Time Password (TOTP) authentication",
+  "author": "Dan Lynch <pyramation@gmail.com>",
+  "contributors": [
+    "Interweb <developers@interweb.co>"
+  ],
   "keywords": [
     "postgresql",
     "pgpm",
