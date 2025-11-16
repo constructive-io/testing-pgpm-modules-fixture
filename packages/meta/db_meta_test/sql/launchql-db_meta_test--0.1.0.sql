@@ -48,9 +48,9 @@ DO $EOFCODE$
 
     INSERT INTO meta_public.domains (database_id, api_id, site_id, subdomain, domain)
       VALUES
-    (database_id, api_id, NULL, 'api', 'lql.io'),
-    (database_id, NULL, site_id, 'app', 'lql.io'),
-    (database_id, meta_api_id, NULL, 'meta', 'lql.io');
+    (database_id, api_id, NULL, 'api', 'pgpm.io'),
+    (database_id, NULL, site_id, 'app', 'pgpm.io'),
+    (database_id, meta_api_id, NULL, 'meta', 'pgpm.io');
 
     -- add schemas
 

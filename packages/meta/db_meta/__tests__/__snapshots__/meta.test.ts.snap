@@ -55,7 +55,7 @@ exports[`db_meta functionality should handle complete meta workflow 5`] = `
 {
   "api_id": "[ID]",
   "database_id": "[ID]",
-  "domain": "lql.io",
+  "domain": "pgpm.io",
   "id": "[ID]",
   "site_id": null,
   "subdomain": "api",
@@ -66,7 +66,7 @@ exports[`db_meta functionality should handle complete meta workflow 6`] = `
 {
   "api_id": null,
   "database_id": "[ID]",
-  "domain": "lql.io",
+  "domain": "pgpm.io",
   "id": "[ID]",
   "site_id": "[ID]",
   "subdomain": "app",
@@ -77,7 +77,7 @@ exports[`db_meta functionality should handle complete meta workflow 7`] = `
 {
   "api_id": "[ID]",
   "database_id": "[ID]",
-  "domain": "lql.io",
+  "domain": "pgpm.io",
   "id": "[ID]",
   "site_id": null,
   "subdomain": "admin",
@@ -87,7 +87,7 @@ exports[`db_meta functionality should handle complete meta workflow 7`] = `
 exports[`db_meta functionality should handle complete meta workflow 8`] = `
 {
   "data": {
-    "supportEmail": "support@launchql.com",
+    "supportEmail": "support@interweb.co",
   },
   "database_id": "[ID]",
   "id": "[ID]",
