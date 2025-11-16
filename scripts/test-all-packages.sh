@@ -52,7 +52,7 @@ test_package() {
         "faker") lql_package_name="pgpm-faker" ;;
         "inflection") lql_package_name="pgpm-inflection" ;;
         "utils") lql_package_name="pgpm-utils" ;;
-        "verify") lql_package_name="pgpm-verify" ;;
+        "verify") lql_package_name="launchql-verify" ;;
         *) lql_package_name="pgpm-$package_name" ;;
     esac
     
