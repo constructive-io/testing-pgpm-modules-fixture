@@ -1,6 +1,6 @@
 {
   "name": "@pgpm/jobs",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Core job system for background task processing in PostgreSQL",
   "keywords": [
     "postgresql",

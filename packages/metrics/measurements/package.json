@@ -1,6 +1,6 @@
 {
   "name": "@pgpm/measurements",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Measurement utilities for performance tracking and analytics",
   "keywords": [
     "postgresql",

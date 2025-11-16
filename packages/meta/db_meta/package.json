@@ -1,6 +1,6 @@
 {
   "name": "@pgpm/meta-db",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Database metadata utilities and introspection functions",
   "keywords": [
     "postgresql",

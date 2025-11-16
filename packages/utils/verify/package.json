@@ -1,6 +1,6 @@
 {
   "name": "@pgpm/verify",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Verification utilities for LaunchQL deploy/verify/revert workflow",
   "keywords": [
     "postgresql",
