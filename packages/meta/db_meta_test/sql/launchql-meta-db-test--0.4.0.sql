@@ -1,4 +1,4 @@
-\echo Use "CREATE EXTENSION launchql-db_meta_test" to load this file. \quit
+\echo Use "CREATE EXTENSION launchql-meta-db-test" to load this file. \quit
 DO $EOFCODE$
   DECLARE
     owner_id uuid = '07281002-1699-4762-57e3-ab1b92243120';
