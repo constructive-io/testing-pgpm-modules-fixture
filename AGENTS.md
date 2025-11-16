@@ -1,6 +1,6 @@
-# AGENTS.md — pgpm/Sqitch‑style Workflow for SQL Changes
+# AGENTS.md — pgpm Workflow for SQL Changes
 
-> **Audience:** internal agents and contributors who ship database changes across the Interweb/pgpm workspace.
+> **Audience:** internal agents and contributors who ship database changes across the pgpm workspace.
 >
 > **Goal:** make safe, testable, reversible SQL changes using a Sqitch‑style plan (`pgpm.plan`) and the `deploy/`, `revert/`, `verify/` folders.
 

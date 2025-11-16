@@ -1,6 +1,6 @@
 # pgpm Extensions
 
-PostgreSQL extensions using the pgpm/Sqitch-style workflow for safe, testable, reversible SQL changes.
+PostgreSQL extensions using the pgpm workflow for safe, testable, reversible SQL changes.
 
 ## Overview
 
@@ -13,7 +13,7 @@ pgpm extends the Sqitch model to a multi-package npm workspace. Each package con
 pnpm install
 
 # Install pgpm CLI globally
-npm install -g @launchql/cli
+npm install -g pgpm
 ```
 
 ## Package Structure
@@ -98,11 +98,8 @@ pnpm eslint .
 ## Publishing
 
 ```bash
-# Version packages
-lerna version
-
 # Publish to npm
-lerna publish from-package
+pnpm lerna publish
 ```
 
 ## Dependencies
