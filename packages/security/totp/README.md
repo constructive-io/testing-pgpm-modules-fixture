@@ -1,5 +1,16 @@
 # @pgpm/totp
 
+<p align="center" width="100%">
+  <img height="250" src="https://raw.githubusercontent.com/launchql/launchql/refs/heads/main/assets/outline-logo.svg" />
+</p>
+
+<p align="center" width="100%">
+  <a href="https://github.com/launchql/pgpm-modules/actions/workflows/ci.yml">
+    <img height="20" src="https://github.com/launchql/pgpm-modules/actions/workflows/ci.yml/badge.svg" />
+  </a>
+   <a href="https://github.com/launchql/launchql/blob/main/LICENSE"><img height="20" src="https://img.shields.io/badge/license-MIT-blue.svg"/></a>
+</p>
+
 TOTP implementation in pure PostgreSQL plpgsql
 
 This extension provides the HMAC Time-Based One-Time Password Algorithm (TOTP) as specified in RFC 4226 as pure plpgsql functions.
