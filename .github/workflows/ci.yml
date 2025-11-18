@@ -95,9 +95,11 @@ jobs:
       - name: Build
         run: pnpm -r build
 
-      - name: Seed pg users
+      - name: Seed pg and app_user
         run: |
           pgpm admin-users bootstrap --yes
+          # optional, but added to avoid concurrent attempts to add user
+          pgpm admin-users add --test --yes
 
       - name: Test ${{ matrix.package }}
         run: cd ./packages/${{ matrix.package }} && pnpm test
