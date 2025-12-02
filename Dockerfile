@@ -25,25 +25,3 @@ COPY . .
 RUN set -eux; \
     pnpm install --frozen-lockfile; \
     pnpm -r bundle
-
-# Collect packaged SQL and relevant metadata into /out
-RUN set -eux; \
-    mkdir -p /out; \
-    for p in /app/packages/*; do \
-      name="$(basename "$p")"; \
-      dest="/out/${name}"; \
-      mkdir -p "$dest"; \
-      # copy packaged SQL if present
-      if [ -d "$p/sql" ]; then \
-        mkdir -p "$dest/sql"; \
-        cp -R "$p/sql"/* "$dest/sql/" || true; \
-      fi; \
-      # copy plan for reference (optional at runtime)
-      if [ -f "$p/pgpm.plan" ]; then \
-        cp "$p/pgpm.plan" "$dest/"; \
-      fi; \
-      # include package.json for provenance/versioning
-      if [ -f "$p/package.json" ]; then \
-        cp "$p/package.json" "$dest/"; \
-      fi; \
-    done
