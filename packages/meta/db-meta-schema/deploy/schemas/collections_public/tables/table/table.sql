@@ -32,6 +32,8 @@ CREATE TABLE collections_public.table (
   plural_name text,
   singular_name text,
 
+  tags citext[] NOT NULL DEFAULT '{}',
+
   -- 
 
   CONSTRAINT db_fkey FOREIGN KEY (database_id) REFERENCES collections_public.database (id) ON DELETE CASCADE,
