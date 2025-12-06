@@ -143,7 +143,20 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.10.1)(pg@8.16.3))(graphql@15.10.1)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.10.1)(pg@8.16.3))
 
-  packages/meta/db_meta:
+  packages/meta/db-meta-modules:
+    dependencies:
+      "@pgpm/db-meta-schema":
+        specifier: workspace:*
+        version: link:../db-meta-schema
+      "@pgpm/verify":
+        specifier: workspace:*
+        version: link:../../utils/verify
+    devDependencies:
+      pgpm:
+        specifier: ^0.2.0
+        version: 0.2.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.10.1)(pg@8.16.3))(graphql@15.10.1)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.10.1)(pg@8.16.3))
+
+  packages/meta/db-meta-schema:
     dependencies:
       "@pgpm/database-jobs":
         specifier: workspace:*
@@ -154,35 +167,6 @@ importers:
       "@pgpm/types":
         specifier: workspace:*
         version: link:../../data-types/types
-      "@pgpm/verify":
-        specifier: workspace:*
-        version: link:../../utils/verify
-    devDependencies:
-      pgpm:
-        specifier: ^0.2.0
-        version: 0.2.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.10.1)(pg@8.16.3))(graphql@15.10.1)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.10.1)(pg@8.16.3))
-
-  packages/meta/db_meta_modules:
-    dependencies:
-      "@pgpm/meta-db":
-        specifier: workspace:*
-        version: link:../db_meta
-      "@pgpm/verify":
-        specifier: workspace:*
-        version: link:../../utils/verify
-    devDependencies:
-      pgpm:
-        specifier: ^0.2.0
-        version: 0.2.0(@babel/core@7.28.0)(@pgsql/types@17.6.1)(graphile-build-pg@4.14.1(graphql@15.10.1)(pg@8.16.3))(graphql@15.10.1)(pg-sql2@4.14.1(pg@8.16.3))(postgraphile-core@4.14.1(graphql@15.10.1)(pg@8.16.3))
-
-  packages/meta/db_meta_test:
-    dependencies:
-      "@pgpm/meta-db":
-        specifier: workspace:*
-        version: link:../db_meta
-      "@pgpm/meta-db-modules":
-        specifier: workspace:*
-        version: link:../db_meta_modules
       "@pgpm/verify":
         specifier: workspace:*
         version: link:../../utils/verify
