@@ -1,11 +1,11 @@
 {
-  "name": "pgpm-extensions",
+  "name": "pgpm-modules",
   "version": "0.0.1",
-  "author": "pgpm <hello@interweb.co>",
+  "author": "Constructive <developers@constructive.io>",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/pgpm/extensions"
+    "url": "https://github.com/constructive-io/pgpm-modules"
   },
   "license": "MIT",
   "engines": {
