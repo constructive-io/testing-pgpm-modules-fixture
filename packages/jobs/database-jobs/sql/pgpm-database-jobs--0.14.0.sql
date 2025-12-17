@@ -1,4 +1,4 @@
-\echo Use "CREATE EXTENSION pgpm-jobs" to load this file. \quit
+\echo Use "CREATE EXTENSION pgpm-database-jobs" to load this file. \quit
 CREATE SCHEMA IF NOT EXISTS app_jobs;
 
 GRANT USAGE ON SCHEMA app_jobs TO administrator;
@@ -23,12 +23,12 @@ CREATE FUNCTION app_jobs.tg_add_job_with_row_id() RETURNS trigger AS $EOFCODE$
 BEGIN
   IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
     PERFORM
-      app_jobs.add_job (tg_argv[0], json_build_object('id', NEW.id));
+      app_jobs.add_job (jwt_private.current_database_id(), tg_argv[0], json_build_object('id', NEW.id));
     RETURN NEW;
   END IF;
   IF (TG_OP = 'DELETE') THEN
     PERFORM
-      app_jobs.add_job (tg_argv[0], json_build_object('id', OLD.id));
+      app_jobs.add_job (jwt_private.current_database_id(), tg_argv[0], json_build_object('id', OLD.id));
     RETURN OLD;
   END IF;
 END;
@@ -40,12 +40,12 @@ CREATE FUNCTION app_jobs.tg_add_job_with_row() RETURNS trigger AS $EOFCODE$
 BEGIN
   IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
     PERFORM
-      app_jobs.add_job (TG_ARGV[0], to_json(NEW));
+      app_jobs.add_job (jwt_private.current_database_id(), TG_ARGV[0], to_json(NEW));
     RETURN NEW;
   END IF;
   IF (TG_OP = 'DELETE') THEN
     PERFORM
-      app_jobs.add_job (TG_ARGV[0], to_json(OLD));
+      app_jobs.add_job (jwt_private.current_database_id(), TG_ARGV[0], to_json(OLD));
     RETURN OLD;
   END IF;
 END;
@@ -102,7 +102,7 @@ BEGIN
       END IF;
     END LOOP;
   PERFORM
-    app_jobs.add_job (fn, app_jobs.json_build_object_apply (args));
+    app_jobs.add_job (jwt_private.current_database_id(), fn, app_jobs.json_build_object_apply (args));
   IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
     RETURN NEW;
   END IF;
@@ -114,7 +114,8 @@ $EOFCODE$ LANGUAGE plpgsql VOLATILE SECURITY DEFINER;
 
 CREATE TABLE app_jobs.scheduled_jobs (
   id bigserial PRIMARY KEY,
-  queue_name text DEFAULT public.gen_random_uuid()::text,
+  database_id uuid NOT NULL,
+  queue_name text DEFAULT (public.gen_random_uuid())::text,
   task_identifier text NOT NULL,
   payload pg_catalog.json DEFAULT '{}'::json NOT NULL,
   priority int DEFAULT 0 NOT NULL,
@@ -155,7 +156,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON app_jobs.scheduled_jobs TO administrator
 
 CREATE TABLE app_jobs.jobs (
   id bigserial PRIMARY KEY,
-  queue_name text DEFAULT public.gen_random_uuid()::text,
+  database_id uuid NOT NULL,
+  queue_name text DEFAULT (public.gen_random_uuid())::text,
   task_identifier text NOT NULL,
   payload pg_catalog.json DEFAULT '{}'::json NOT NULL,
   priority int DEFAULT 0 NOT NULL,
@@ -290,7 +292,9 @@ BEGIN
     app_jobs.scheduled_jobs s
   WHERE
     s.id = run_scheduled_job.id INTO last_id;
+
   -- if it's been scheduled check if it's been run
+  
   IF (last_id IS NOT NULL) THEN
     SELECT
       locked_by
@@ -306,9 +310,18 @@ BEGIN
       RAISE EXCEPTION 'ALREADY_SCHEDULED';
     END IF;
   END IF;
+
   -- insert new job
-  INSERT INTO app_jobs.jobs (queue_name, task_identifier, payload, priority, max_attempts, key)
-  SELECT
+  INSERT INTO app_jobs.jobs (
+    database_id,
+    queue_name,
+    task_identifier,
+    payload,
+    priority,
+    max_attempts,
+    key
+  ) SELECT
+    database_id,
     queue_name,
     task_identifier,
     payload,
@@ -407,9 +420,15 @@ DECLARE
   v_job_id bigint;
   v_row app_jobs.scheduled_jobs;
 BEGIN
+
+  --
+
   IF worker_id IS NULL THEN
     RAISE exception 'INVALID_WORKER_ID';
   END IF;
+
+  --
+
   SELECT
     scheduled_jobs.id INTO v_job_id
   FROM
@@ -423,9 +442,15 @@ BEGIN
   LIMIT 1
   FOR UPDATE
     SKIP LOCKED;
+
+  --
+
   IF v_job_id IS NULL THEN
     RETURN NULL;
   END IF;
+
+  --
+
   UPDATE
     app_jobs.scheduled_jobs
   SET
@@ -435,6 +460,9 @@ BEGIN
     id = v_job_id
   RETURNING
     * INTO v_row;
+
+  --
+
   RETURN v_row;
 END;
 $EOFCODE$;
@@ -446,9 +474,13 @@ DECLARE
   v_row app_jobs.jobs;
   v_now timestamptz = now();
 BEGIN
+
   IF worker_id IS NULL THEN
     RAISE exception 'INVALID_WORKER_ID';
   END IF;
+
+  --
+
   SELECT
     jobs.queue_name,
     jobs.id INTO v_queue_name,
@@ -480,9 +512,15 @@ BEGIN
   LIMIT 1
   FOR UPDATE
     SKIP LOCKED;
+
+  --
+
   IF v_job_id IS NULL THEN
     RETURN NULL;
   END IF;
+
+  --
+
   IF v_queue_name IS NOT NULL THEN
     UPDATE
       app_jobs.job_queues
@@ -492,6 +530,9 @@ BEGIN
     WHERE
       job_queues.queue_name = v_queue_name;
   END IF;
+
+  --
+
   UPDATE
     app_jobs.jobs
   SET
@@ -502,6 +543,8 @@ BEGIN
     id = v_job_id
   RETURNING
     * INTO v_row;
+
+  --
   RETURN v_row;
 END;
 $EOFCODE$;
@@ -567,23 +610,40 @@ BEGIN
 END;
 $EOFCODE$;
 
-CREATE FUNCTION app_jobs.add_scheduled_job(identifier text, payload pg_catalog.json DEFAULT '{}'::json, schedule_info pg_catalog.json DEFAULT '{}'::json, job_key text DEFAULT NULL, queue_name text DEFAULT NULL, max_attempts int DEFAULT 25, priority int DEFAULT 0) RETURNS app_jobs.scheduled_jobs AS $EOFCODE$
+CREATE FUNCTION app_jobs.add_scheduled_job(db_id uuid, identifier text, payload pg_catalog.json DEFAULT '{}'::json, schedule_info pg_catalog.json DEFAULT '{}'::json, job_key text DEFAULT NULL, queue_name text DEFAULT NULL, max_attempts int DEFAULT 25, priority int DEFAULT 0) RETURNS app_jobs.scheduled_jobs AS $EOFCODE$
 DECLARE
   v_job app_jobs.scheduled_jobs;
 BEGIN
   IF job_key IS NOT NULL THEN
 
     -- Upsert job	
-    INSERT INTO app_jobs.scheduled_jobs (task_identifier, payload, queue_name, schedule_info, max_attempts, KEY, priority)	
-      VALUES (identifier, coalesce(payload, '{}'::json), queue_name, schedule_info, coalesce(max_attempts, 25), job_key, coalesce(priority, 0))	
-    ON CONFLICT (KEY)	
+    INSERT INTO app_jobs.scheduled_jobs (
+      database_id,
+      task_identifier,
+      payload,
+      queue_name,
+      schedule_info,
+      max_attempts,
+      key,
+      priority
+      ) VALUES (
+        db_id,
+        identifier,
+        coalesce(payload, '{}'::json),
+        queue_name,
+        schedule_info,
+        coalesce(max_attempts, 25),
+        job_key,
+        coalesce(priority, 0)
+    )	
+    ON CONFLICT (key)	
       DO UPDATE SET	
-        task_identifier = excluded.task_identifier,
-        payload = excluded.payload,
-        queue_name = excluded.queue_name,
-        max_attempts = excluded.max_attempts,
-        schedule_info = excluded.schedule_info,
-        priority = excluded.priority
+        task_identifier = EXCLUDED.task_identifier,
+        payload = EXCLUDED.payload,
+        queue_name = EXCLUDED.queue_name,
+        max_attempts = EXCLUDED.max_attempts,
+        schedule_info = EXCLUDED.schedule_info,
+        priority = EXCLUDED.priority
       WHERE	
         scheduled_jobs.locked_at IS NULL	
       RETURNING	
@@ -604,25 +664,61 @@ BEGIN
       KEY = job_key;	
   END IF;
 
-  INSERT INTO app_jobs.scheduled_jobs (task_identifier, payload, queue_name, schedule_info, max_attempts, priority)
-    VALUES (identifier, payload, queue_name, schedule_info, max_attempts, priority)
-  RETURNING
-    * INTO v_job;
+  INSERT INTO app_jobs.scheduled_jobs (
+    database_id,
+    task_identifier,
+    payload,
+    queue_name,
+    schedule_info,
+    max_attempts,
+    priority
+    ) VALUES (
+    db_id,
+    identifier,
+    payload,
+    queue_name,
+    schedule_info,
+    max_attempts,
+    priority
+  ) RETURNING * INTO v_job;
   RETURN v_job;
 END;
 $EOFCODE$ LANGUAGE plpgsql VOLATILE SECURITY DEFINER;
 
-CREATE FUNCTION app_jobs.add_job(identifier text, payload pg_catalog.json DEFAULT '{}'::json, job_key text DEFAULT NULL, queue_name text DEFAULT NULL, run_at timestamptz DEFAULT now(), max_attempts int DEFAULT 25, priority int DEFAULT 0) RETURNS app_jobs.jobs AS $EOFCODE$
+CREATE FUNCTION app_jobs.add_job(db_id uuid, identifier text, payload pg_catalog.json DEFAULT '{}'::json, job_key text DEFAULT NULL, queue_name text DEFAULT NULL, run_at timestamptz DEFAULT now(), max_attempts int DEFAULT 25, priority int DEFAULT 0) RETURNS app_jobs.jobs AS $EOFCODE$
 DECLARE
   v_job app_jobs.jobs;
 BEGIN
   IF job_key IS NOT NULL THEN
     -- Upsert job	
-    INSERT INTO app_jobs.jobs (task_identifier, payload, queue_name, run_at, max_attempts, KEY, priority)	
-      VALUES (identifier, coalesce(payload, '{}'::json), queue_name, coalesce(run_at, now()), coalesce(max_attempts, 25), job_key, coalesce(priority, 0))	
-    ON CONFLICT (KEY)	
+    INSERT INTO app_jobs.jobs (
+      database_id,
+      task_identifier,
+      payload,
+      queue_name,
+      run_at,
+      max_attempts,
+      key,
+      priority
+    ) VALUES (
+        db_id,
+        identifier,
+        coalesce(payload,
+        '{}'::json),
+        queue_name,
+        coalesce(run_at, now()),
+        coalesce(max_attempts, 25),
+        job_key,
+        coalesce(priority, 0)
+    )	
+    ON CONFLICT (key)	
       DO UPDATE SET	
-        task_identifier = excluded.task_identifier, payload = excluded.payload, queue_name = excluded.queue_name, max_attempts = excluded.max_attempts, run_at = excluded.run_at, priority = excluded.priority,	
+        task_identifier = EXCLUDED.task_identifier,
+        payload = EXCLUDED.payload,
+        queue_name = EXCLUDED.queue_name,
+        max_attempts = EXCLUDED.max_attempts,
+        run_at = EXCLUDED.run_at,
+        priority = EXCLUDED.priority,	
         -- always reset error/retry state	
         attempts = 0, last_error = NULL	
       WHERE	
@@ -649,10 +745,25 @@ BEGIN
       KEY = job_key;	
   END IF;
 
-  INSERT INTO app_jobs.jobs (task_identifier, payload, queue_name, run_at, max_attempts, priority)
-    VALUES (identifier, payload, queue_name, run_at, max_attempts, priority)
-  RETURNING
-    * INTO v_job;
+  INSERT INTO app_jobs.jobs (
+    database_id,
+    task_identifier,
+    payload,
+    queue_name,
+    run_at,
+    max_attempts,
+    priority
+  ) VALUES (
+    db_id,
+    identifier,
+    payload,
+    queue_name,
+    run_at,
+    max_attempts,
+    priority
+  )
+  RETURNING * INTO v_job;
+
   RETURN v_job;
 END;
 $EOFCODE$ LANGUAGE plpgsql VOLATILE SECURITY DEFINER;

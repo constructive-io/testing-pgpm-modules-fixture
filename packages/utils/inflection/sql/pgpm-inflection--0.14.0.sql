@@ -184,6 +184,10 @@ FROM
   nosingles;
 $EOFCODE$ LANGUAGE sql IMMUTABLE;
 
+CREATE FUNCTION inflection.underscore(parts text[]) RETURNS text AS $EOFCODE$
+  SELECT inflection.underscore(array_to_string(parts, '_'));
+$EOFCODE$ LANGUAGE sql IMMUTABLE;
+
 CREATE FUNCTION inflection.camel(str text) RETURNS text AS $EOFCODE$
 DECLARE
   result text[];

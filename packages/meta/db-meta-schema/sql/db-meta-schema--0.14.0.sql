@@ -68,6 +68,8 @@ COMMENT ON CONSTRAINT db_fkey ON collections_public.schema IS '@omit manyToMany'
 
 CREATE INDEX schema_database_id_idx ON collections_public.schema (database_id);
 
+CREATE TYPE collections_public.table_category AS ENUM ('core', 'module', 'app');
+
 CREATE TABLE collections_public."table" (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   database_id uuid NOT NULL DEFAULT uuid_nil(),
@@ -76,12 +78,15 @@ CREATE TABLE collections_public."table" (
   label text,
   description text,
   smart_tags jsonb,
-  is_system boolean DEFAULT false,
+  category collections_public.table_category NOT NULL DEFAULT 'app',
+  module text NULL,
+  scope int NULL,
   use_rls boolean NOT NULL DEFAULT false,
   timestamps boolean NOT NULL DEFAULT false,
   peoplestamps boolean NOT NULL DEFAULT false,
   plural_name text,
   singular_name text,
+  tags citext[] NOT NULL DEFAULT '{}',
   CONSTRAINT db_fkey
     FOREIGN KEY(database_id)
     REFERENCES collections_public.database (id)
@@ -191,6 +196,7 @@ CREATE TABLE collections_public.field (
   chk_expr jsonb DEFAULT NULL,
   min double precision DEFAULT NULL,
   max double precision DEFAULT NULL,
+  tags citext[] NOT NULL DEFAULT '{}',
   CONSTRAINT db_fkey
     FOREIGN KEY(database_id)
     REFERENCES collections_public.database (id)

@@ -14,8 +14,7 @@ ALTER DEFAULT PRIVILEGES
 
 REVOKE CREATE ON SCHEMA public FROM PUBLIC RESTRICT;
 
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public
-  TO authenticated, anonymous, administrator;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated, anonymous, administrator;
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT EXECUTE ON FUNCTIONS TO authenticated, anonymous, administrator;

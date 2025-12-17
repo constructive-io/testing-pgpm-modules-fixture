@@ -1,9 +1,6 @@
 \echo Use "CREATE EXTENSION pgpm-types" to load this file. \quit
-CREATE DOMAIN attachment AS jsonb 
-  CHECK (
-  value ?& ARRAY['url', 'mime']
-    AND (value ->> 'url') ~ E'^(https?)://[^\\s/$.?#].[^\\s]*$'
-);
+CREATE DOMAIN attachment AS text 
+  CHECK (value ~ E'^(https?)://[^\\s/$.?#].[^\\s]*$');
 
 COMMENT ON DOMAIN attachment IS '@name pgpmInternalTypeAttachment';
 
@@ -29,6 +26,11 @@ CREATE DOMAIN multiple_select AS jsonb
   CHECK (value ?& ARRAY['value']);
 
 COMMENT ON DOMAIN multiple_select IS '@name pgpmInternalTypeMultipleSelect';
+
+CREATE DOMAIN origin AS text 
+  CHECK (value = SUBSTRING(value FROM '^(https?://[^/]*)'));
+
+COMMENT ON DOMAIN origin IS '@name pgpmInternalTypeOrigin';
 
 CREATE DOMAIN single_select AS jsonb 
   CHECK (value ?& ARRAY['value']);
