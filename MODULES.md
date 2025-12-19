@@ -41,7 +41,6 @@
 ## Security & Authentication
 
 ### Core Security
-- [ ] `packages/security/default-roles` - Default role definitions
 - [ ] `packages/security/defaults` - Security defaults
 - [ ] `packages/security/jwt-claims` - JWT claim handling
 - [ ] `packages/security/totp` - Time-based One-Time Password (TOTP)
@@ -64,4 +63,3 @@
 ### Performance & Tracking
 - [ ] `packages/metrics/measurements` - Measurement utilities
 - [ ] `packages/metrics/achievements` - Achievement system
-
