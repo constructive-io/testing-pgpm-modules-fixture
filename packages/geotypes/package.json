@@ -1,6 +1,6 @@
 {
   "name": "@pgpm-testing/geotypes",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Geographic data types and spatial functions for PostgreSQL",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "contributors": [
