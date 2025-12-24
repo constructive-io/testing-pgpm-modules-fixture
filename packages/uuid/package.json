@@ -1,6 +1,6 @@
 {
   "name": "@pgpm-testing/uuid",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "UUID utilities and extensions for PostgreSQL",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "contributors": [

@@ -1,6 +1,6 @@
 {
   "name": "@pgpm-testing/jwt-claims",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "JWT claim handling and validation functions",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "contributors": [

@@ -1,6 +1,6 @@
 {
   "name": "@pgpm-testing/db-meta-schema",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Database metadata utilities and introspection functions",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "contributors": [

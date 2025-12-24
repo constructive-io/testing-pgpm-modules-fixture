@@ -1,6 +1,6 @@
 {
   "name": "@pgpm-testing/faker",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Fake data generation utilities for testing and development",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "contributors": [
