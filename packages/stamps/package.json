@@ -1,5 +1,5 @@
 {
-  "name": "@pgpm/stamps",
+  "name": "@pgpm-testing/stamps",
   "version": "0.15.3",
   "description": "Timestamp utilities and audit trail functions for PostgreSQL",
   "author": "Dan Lynch <pyramation@gmail.com>",
@@ -21,8 +21,8 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@pgpm/jwt-claims": "workspace:*",
-    "@pgpm/verify": "workspace:*"
+    "@pgpm-testing/jwt-claims": "workspace:*",
+    "@pgpm-testing/verify": "workspace:*"
   },
   "devDependencies": {
     "pgpm": "^1.0.0"

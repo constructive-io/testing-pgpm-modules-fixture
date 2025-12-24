@@ -1,5 +1,5 @@
 {
-  "name": "@pgpm/encrypted-secrets",
+  "name": "@pgpm-testing/encrypted-secrets",
   "version": "0.15.3",
   "description": "Encrypted secrets management for PostgreSQL",
   "author": "Dan Lynch <pyramation@gmail.com>",
@@ -21,8 +21,8 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@pgpm/encrypted-secrets-table": "workspace:*",
-    "@pgpm/verify": "workspace:*"
+    "@pgpm-testing/encrypted-secrets-table": "workspace:*",
+    "@pgpm-testing/verify": "workspace:*"
   },
   "devDependencies": {
     "pgpm": "^1.0.0"

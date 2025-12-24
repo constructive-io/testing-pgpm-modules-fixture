@@ -1,5 +1,5 @@
 {
-  "name": "@pgpm/verify",
+  "name": "@pgpm-testing/verify",
   "version": "0.15.3",
   "description": "Verification utilities for PGPM deploy/verify/revert workflow",
   "author": "Dan Lynch <pyramation@gmail.com>",

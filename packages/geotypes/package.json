@@ -1,5 +1,5 @@
 {
-  "name": "@pgpm/geotypes",
+  "name": "@pgpm-testing/geotypes",
   "version": "0.15.3",
   "description": "Geographic data types and spatial functions for PostgreSQL",
   "author": "Dan Lynch <pyramation@gmail.com>",
@@ -21,8 +21,8 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@pgpm/types": "workspace:*",
-    "@pgpm/verify": "workspace:*"
+    "@pgpm-testing/types": "workspace:*",
+    "@pgpm-testing/verify": "workspace:*"
   },
   "devDependencies": {
     "pgpm": "^1.0.0"
