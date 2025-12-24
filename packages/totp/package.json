@@ -1,6 +1,6 @@
 {
   "name": "@pgpm-testing/totp",
-  "version": "0.15.3",
+  "version": "1.0.0",
   "description": "Time-based One-Time Password (TOTP) authentication",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "contributors": [
